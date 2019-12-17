@@ -1,0 +1,95 @@
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-100.eot');
+    src: url('MuseoSans-100.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-100.svg#MuseoSans-100') format('svg'),
+    url('MuseoSans-100.ttf') format('truetype'),
+    url('MuseoSans-100.woff') format('woff'),
+    url('MuseoSans-100.woff2') format('woff2');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-100Italic.eot');
+    src: url('MuseoSans-100Italic.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-100Italic.svg#MuseoSans-100Italic') format('svg'),
+    url('MuseoSans-100Italic.ttf') format('truetype'),
+    url('MuseoSans-100Italic.woff') format('woff'),
+    url('MuseoSans-100Italic.woff2') format('woff2');
+    font-weight: 100;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-300.eot');
+    src: url('MuseoSans-300.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-300.svg#MuseoSans-300') format('svg'),
+    url('MuseoSans-300.ttf') format('truetype'),
+    url('MuseoSans-300.woff') format('woff'),
+    url('MuseoSans-300.woff2') format('woff2');
+    font-weight: 300 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-300Italic.eot');
+    src: url('MuseoSans-300Italic.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-300Italic.svg#MuseoSans-300Italic') format('svg'),
+    url('MuseoSans-300Italic.ttf') format('truetype'),
+    url('MuseoSans-300Italic.woff') format('woff'),
+    url('MuseoSans-300Italic.woff2') format('woff2');
+    font-weight: 300 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-500.eot');
+    src: url('MuseoSans-500.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-500.svg#MuseoSans-500') format('svg'),
+    url('MuseoSans-500.ttf') format('truetype'),
+    url('MuseoSans-500.woff') format('woff'),
+    url('MuseoSans-500.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-500Italic.eot');
+    src: url('MuseoSans-500Italic.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-500Italic.svg#MuseoSans-500Italic') format('svg'),
+    url('MuseoSans-500Italic.ttf') format('truetype'),
+    url('MuseoSans-500Italic.woff') format('woff'),
+    url('MuseoSans-500Italic.woff2') format('woff2');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-700.eot');
+    src: url('MuseoSans-700.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-700.svg#MuseoSans-700') format('svg'),
+    url('MuseoSans-700.ttf') format('truetype'),
+    url('MuseoSans-700.woff') format('woff'),
+    url('MuseoSans-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MuseoSans';
+    src: url('MuseoSans-700Italic.eot');
+    src: url('MuseoSans-700Italic.eot?#iefix') format('embedded-opentype'),
+    url('MuseoSans-700Italic.svg#MuseoSans-700Italic') format('svg'),
+    url('MuseoSans-700Italic.ttf') format('truetype'),
+    url('MuseoSans-700Italic.woff') format('woff'),
+    url('MuseoSans-700Italic.woff2') format('woff2');
+    font-weight: 700;
+    font-style: italic;
+}
