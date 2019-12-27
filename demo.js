@@ -28,7 +28,10 @@ export class MvCalendarDemo extends LitElement {
   render() {
     return html`
     <div class="main">
-      <mv-calendar></mv-calendar>
+      <h4>Single Calendar</h4>
+      <mv-calendar id="simple" name="simple" type="simple" style="dark"></mv-calendar>
+      <h4>Calendar with date range</h4>
+      <mv-calendar id="range" name="range" type="range" style="dark"></mv-calendar>
     </div>
     `;
   }
