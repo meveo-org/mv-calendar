@@ -1,0 +1,3 @@
+[submodule "web_modules/mv-linear-icons"]
+	path = web_modules/mv-linear-icons
+	url = https://github.com/meveo-frontend/mv-linear-icons.git

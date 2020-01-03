@@ -1,4 +1,5 @@
 import { LitElement, html, css } from "lit-element";
+import { MvLinearIcon, ICONS } from "mv-linear-icons";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -48,16 +49,6 @@ export class MvCalendar extends LitElement {
         font-weight: bold;
       }
 
-      .mv-calendar-container {
-        min-width: var(--mv-container-min-width, 584px);
-        max-width: var(--mv-container-max-width, 615px);
-        -webkit-box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
-        -moz-box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
-        box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
-        padding: 5px;
-        display: flex;
-      }
-
       .mv-single-calendar-container {
         min-width: var(--mv-container-min-width, 420px);
         max-width: var(--mv-container-max-width, 420px);
@@ -70,6 +61,7 @@ export class MvCalendar extends LitElement {
         padding: 5px;
         display: flex;
         border-radius: 5px;
+        color: #fff;
       }
 
       .mv-range-calendar-container {
@@ -84,27 +76,42 @@ export class MvCalendar extends LitElement {
         padding: 5px;
         display: flex;
         border-radius: 5px;
+        color: #fff;
       }
 
-      .mv-input-calendar-container {
-        min-width: var(--mv-container-min-width, 584px);
-        max-width: var(--mv-container-max-width, 615px);
-        -webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
-        -moz-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
-        box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
-        background-color: #3F4753;
-        border-color: #1E3843;
+      .mv-popup-calendar-container {
+        min-width: var(--mv-container-min-width, 365px);
+        max-width: var(--mv-container-max-width, 365px);
+        -webkit-box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
+        -moz-box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
+        box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
         padding: 5px;
-        display: flex;
+        color: #000;
+        display: none;
+        margin-bottom: 25px;
       }
+
+      .show-calendar {
+        display: block;
+      };
 
       .month-year-header {
-        text-transform: uppercase;
         font-size: 1rem;
         text-transform: uppercase;
         padding-bottom: 5px;
-        color: #fff;
         text-align: center;
+      }
+
+      .card-header {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .input-field {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        border-bottom: 1px solid #000;
       }
 
       .date-container {
@@ -155,17 +162,33 @@ export class MvCalendar extends LitElement {
         position: relative;
       }
 
+      #previous {
+        border-right-color: black;
+	      left: 0;
+      }
+
+      #next {
+        border-left-color: black;
+        right: 0;
+      }
+
       .table td {
-        padding: 3px 5px;
       	vertical-align: top;
-        color: #fff;
         font-family: "MuseoSans", sans-serif;
         font-size: 1rem;
         font-weight: 100;
       }
 
+      .table td.standard-padding {
+        padding: var(--mv-table-padding, 3px 5px);
+      }
+
+      .table td.input-padding {
+        padding: var(--mv-table-padding, 0.1rem 0.75rem);
+      }
+
       .calendar {
-        width: 280px;
+        width: var(--mv-calendar-width, 280px);
         display: flex;
         flex-direction: column;
         margin-top: 10px;
@@ -206,6 +229,43 @@ export class MvCalendar extends LitElement {
         border-radius: 0.3rem;
         display: inline-block;
         position: relative;
+      }
+
+      .datepicker-wrapper {
+        display: inline-block;
+        position: relative;
+        min-width: 380px;
+      }
+
+      .datepicker-wrapper .calendar-button-container {
+        display: flex;
+      }
+
+      .calendar-btn {
+        cursor: pointer;
+      }
+
+      .datepicker__input-container {
+        width: 100%;
+      }
+
+      .datepicker__input-container input {
+        border: solid 1px #4E686D;
+        width: 100%;
+        padding: 5px 5px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        height: 32px;
+        -webkit-transition: border 0.3s;
+        -o-transition: border 0.3s;
+        transition: border 0.3s;
+        background: transparent;
+        color: #646777;
+        overflow: visible;
+      }
+
+      .datepicker__input-container input::placeholder {
+        color: #999;
       }
 
       .datepicker__triangle {
@@ -364,7 +424,9 @@ export class MvCalendar extends LitElement {
       return html `${this.renderRangeCalendar()}`;
     } else if (this.type === 'input') {
       return html `${this.renderCalendarWithInputField()}`;
-    } else {
+    } else if (this.type === 'button') {
+      return html `${this.renderCalendarWithButton()}`;
+    }else {
       return html `${this.renderSingleCalendar()}`;
     }
   };
@@ -475,24 +537,62 @@ export class MvCalendar extends LitElement {
   };
 
   renderCalendarWithInputField = () => {
-    return html `<div class="mv-input-calendar-container ${this.style}">
-      <div class="month-year-header">
-        <div class="card-header" id="monthAndYear"></div>
-        <div class="prev-next-container">
-          <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
-          <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
-        </div>
+    return html `
+    <div class="datepicker-wrapper">
+      <div class="datepicker__input-container">
+        <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" @focus=${this.showPopupCalendar} readonly>
       </div>
-      <table class="table" id="calendar">
-        <thead>
-          <tr>
-            ${this.days.map(day => html `<td>${day}</td>`)}
-          </tr>
-        </thead>
-        <tbody id="current-month-calendar-body">
-        </tbody>
-      </table>
-    </div>`;
+      <div class="mv-popup-calendar-container ${this.style}">
+        <div class="month-year-header input-field">
+          <div class="card-header" id="monthAndYear"></div>
+          <div class="prev-next-container">
+            <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
+            <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
+          </div>
+        </div>
+        <table class="table" id="calendar">
+          <thead>
+            <tr>
+              ${this.days.map(day => html `<td style='text-align:center'>${day}</td>`)}
+            </tr>
+          </thead>
+          <tbody id="current-month-calendar-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+    `;
+  };
+
+  renderCalendarWithButton = () => {
+    return html `
+    <div class="datepicker-wrapper">
+      <div class="calendar-button-container">
+        <div class="datepicker__input-container">
+          <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" readonly>
+        </div>
+        <button class="calendar-btn" @click=${this.showPopupCalendar}><mv-lnr icon="calendar-full"></mv-lnr></button>
+      </div>
+      <div class="mv-popup-calendar-container ${this.style}">
+        <div class="month-year-header input-field">
+          <div class="card-header" id="monthAndYear"></div>
+          <div class="prev-next-container">
+            <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
+            <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
+          </div>
+        </div>
+        <table class="table" id="calendar">
+          <thead>
+            <tr>
+              ${this.days.map(day => html `<td style='text-align:center'>${day}</td>`)}
+            </tr>
+          </thead>
+          <tbody id="current-month-calendar-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+    `;
   };
 
   showCalendar = (month, year, tableBody = 'current-month-calendar-body') => {
@@ -521,6 +621,11 @@ export class MvCalendar extends LitElement {
               let cell = document.createElement("td");
               let cellText = document.createTextNode("");
               let dateContainer = document.createElement("div");
+              if (this.type === 'input' || this.type === 'button') {
+                cell.classList.add('input-padding');
+              } else {
+                cell.classList.add('standard-padding');
+              }
               dateContainer.classList.add('date-container', tableBody);
               dateContainer.appendChild(cellText);
               cell.appendChild(dateContainer);
@@ -533,6 +638,11 @@ export class MvCalendar extends LitElement {
             let dateContainer = document.createElement("div");
             let cellText = document.createTextNode(date);
             const calendarDate = new Date(`${month + 1}/${date}/${year}`);
+            if (this.type === 'input' || this.type === 'button') {
+              cell.classList.add('input-padding');
+            } else {
+              cell.classList.add('standard-padding');
+            }
             dateContainer.classList.add('date-container', tableBody);
             if (date === this.today.getDate() && year === this.today.getFullYear() && month === this.today.getMonth()) {
                 dateContainer.classList.add("current-date");
@@ -642,12 +752,16 @@ export class MvCalendar extends LitElement {
   getSelectedDate = (cell) => {
     if (cell.classList.contains('current-month-calendar-body')) {
       this.startDate = new Date(this.currentYear, this.currentMonth, cell.innerText);
-      this.startDateField.value = this.getFormattedDate(this.startDate);
+      if (this.startDateField) {
+        this.startDateField.value = this.getFormattedDate(this.startDate);
+      }
     }
 
     if (cell.classList.contains('next-month-calendar-body')) {
       this.endDate = new Date(this.nextYear, this.nextMonth, cell.innerText);
-      this.endDateField.value = this.getFormattedDate(this.endDate);
+      if (this.endDateField) {
+        this.endDateField.value = this.getFormattedDate(this.endDate);
+      }
     }
 
     return {
@@ -660,8 +774,13 @@ export class MvCalendar extends LitElement {
     this.removeHighlightedDateCell(cell);
     this.highlightDateCell(cell);
     if (this.type !== 'range') {
-        this.endDate = null;
-        this.resetFilterButtonSelection();
+      const calendarInputField = this.renderRoot.getElementById('calendarInputField');
+      if (calendarInputField) {
+        calendarInputField.value = this.getFormattedDate(this.startDate);
+        this.hidePopupCalendar();
+      }
+      this.endDate = null;
+      this.resetFilterButtonSelection();
     } else {
       if (selectedDate.startDate && selectedDate.endDate) {
         this.resetFilterButtonSelection();
@@ -703,6 +822,20 @@ export class MvCalendar extends LitElement {
       filterButtons[i].classList.remove("filter-btn-selected");
     }
   };
+
+  showPopupCalendar = () => {
+    const calendar = this.renderRoot.querySelector('.mv-popup-calendar-container');
+    if (calendar) {
+      calendar.classList.add('show-calendar');
+    }
+  };
+
+  hidePopupCalendar = () => {
+    const calendar = this.renderRoot.querySelector('.mv-popup-calendar-container');
+    if (calendar) {
+      calendar.classList.remove('show-calendar');
+    }
+  }
 
   handleDateToday = () => {
     this.startDate = new Date();
