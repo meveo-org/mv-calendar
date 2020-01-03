@@ -39,6 +39,11 @@ export class MvCalendar extends LitElement {
       	color: #FFFFFF;
       }
 
+      .filter-btn-selected {
+        background-color: #ccc !important;
+        color: #000 !important;
+      }
+
       .current-date {
         font-weight: bold;
       }
@@ -136,15 +141,6 @@ export class MvCalendar extends LitElement {
       	width: 10px;
       	text-indent: -999em;
       	overflow: hidden;
-      }
-
-      #previous {
-        border-right-color: black;
-	      left: 0;
-      }
-      #next {
-        border-left-color: black;
-        right: 0;
       }
 
       .date-container:hover {
@@ -322,136 +318,83 @@ export class MvCalendar extends LitElement {
     this.today = new Date();
     this.currentMonth = this.today.getMonth();
     this.currentYear = this.today.getFullYear();
+    this.nextMonth = this.currentMonth;
+    this.nextYear = this.currentYear;
     this.selectYear = null;
     this.selectMonth = null;
     this.monthAndYear = null;
     this.nextMonthAndYear = null;
     this.startDateField = null;
+    this.currentMonthCalendar = null;
+    this.nextMonthCalendar = null;
     this.months = MONTHS;
     this.days = DAYS;
     this.name = '';
     this.type = 'single';
+    this.startDate = null;
+    this.endDate = null;
   }
 
-  selectDate = (cell) => {
-    if (cell) {
-      const container = this.renderRoot.querySelector('.bg-info');
-      if (container) {
-        container.classList.remove('bg-info');
-      }
-      cell.classList.add("bg-info");
-      this.getSelectedDate(cell);
-    }
-  };
-
-  showCalendar = (month, year, tableBody = 'current-month-calendar-body') => {
-    let firstDay = (new Date(year, month)).getDay();
-    let daysInMonth = 32 - new Date(year, month, 32).getDate();
-
-    const tbl = this.renderRoot.querySelector(`#${tableBody}`);
-
-    tbl.innerHTML = "";
-
-    this.monthAndYear.innerHTML = this.months[month] + " " + year;
-    if (this.type === 'range') {      
-      const nextMonth = (this.currentMonth + 1) % 12;
-      const yearToUse = nextMonth === 0 ? (year + 1) : year;
-      this.nextMonthAndYear.innerHTML = this.months[nextMonth] + " " + yearToUse;
-    }
-
-    let date = 1;
-    for (let i = 0; i < 6; i++) {
-      let row = document.createElement("tr");
-
-      for (let j = 0; j < 7; j++) {
-        if (i === 0 && j < firstDay) {
-            let cell = document.createElement("td");
-            let cellText = document.createTextNode("");
-            let dateContainer = document.createElement("div");
-            cell.addEventListener('click', this.selectDate);
-            dateContainer.classList.add('date-container');
-            dateContainer.appendChild(cellText);
-            cell.appendChild(dateContainer);
-            row.appendChild(cell);
-        }
-        else if (date > daysInMonth) {
-            break;
-        } else {
-          let cell = document.createElement("td");
-          let dateContainer = document.createElement("div");
-          let cellText = document.createTextNode(date);
-          dateContainer.classList.add('date-container');
-          if (date === this.today.getDate() && year === this.today.getFullYear() && month === this.today.getMonth()) {
-              dateContainer.classList.add("current-date");
-          } // color today's date
-          cell.addEventListener('click', e => this.selectDate(dateContainer));
-          dateContainer.appendChild(cellText);
-          cell.appendChild(dateContainer);
-          row.appendChild(cell);
-          date++;
-        }
-      }
-
-      tbl.appendChild(row);
-    }
-  };
-
-  previous = () => {
-    this.currentYear = (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
-    this.currentMonth = (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
+  firstUpdated(changedProperties) {
+    this.selectYear = this.renderRoot.getElementById("year");
+    this.selectMonth = this.renderRoot.getElementById("month");
+    this.monthAndYear = this.renderRoot.getElementById("monthAndYear");
+    this.nextMonthAndYear = this.renderRoot.getElementById("nextMonthAndYear");
+    this.startDateField = this.renderRoot.getElementById("startDateField");
+    this.currentMonthCalendar = this.renderRoot.getElementById("currentMonthCalendar");
+    this.nextMonthCalendar = this.renderRoot.getElementById("nextMonthCalendar");
     this.showCalendar(this.currentMonth, this.currentYear);
-  };
-
-  next = () => {
-    this.currentYear = (this.currentMonth === 11) ? this.currentYear + 1 : this.currentYear;
-    this.currentMonth = (this.currentMonth + 1) % 12;
-    this.showCalendar(this.currentMonth, this.currentYear);
-  };
-
-  jump = () => {
-    this.currentYear = parseInt(this.selectYear.value);
-    this.currentMonth = parseInt(this.selectMonth.value);
-    this.showCalendar(this.currentMonth, this.currentYear);
+    if (this.type === 'range') {
+      this.endDateField = this.renderRoot.getElementById("endDateField");
+      this.showCalendar(this.nextMonth, this.nextYear, 'next-month-calendar-body');
+    }
   }
 
-  getSelectedDate = (cell) => {
-    const selectedDate = new Date(this.currentYear, this.currentMonth, cell.innerText);
-    this.startDateField.value = this.getFormattedDate(selectedDate);
-    if (this.endDateField) {
-      this.endDateField.value = this.getFormattedDate(selectedDate);
+  render() {
+    return html `
+      ${this.renderCalendar()}
+    `;
+  }
+
+  renderCalendar = () => {
+    let view = '';
+    if (this.type === 'single') {
+      return html `${this.renderSingleCalendar()}`;
+    } else if (this.type === 'range') {
+      return html `${this.renderRangeCalendar()}`;
+    } else if (this.type === 'input') {
+      return html `${this.renderCalendarWithInputField()}`;
+    } else {
+      return html `${this.renderSingleCalendar()}`;
     }
-    return selectedDate;
   };
 
-  getFormattedDate = (date) => {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  }
+  renderFilterButtonContainer = () => {
+    return html `<div class="button-container">
+      <div class="button-list">
+          <div class="button-item"><button id="todayBtn" class="date-btn" tabindex="0" type="button" name="today" @click=${this.handleDateToday}><span class="MuiButton-label">Today</span></button></div>
+          <div class="button-item"><button id="yesterdayBtn" class="date-btn" tabindex="0" type="button" name="yesterday" @click=${this.handleDateYesterday}><span class="MuiButton-label">Yesterday</span></button></div>
+          <div class="button-item"><button id="last7DaysBtn" class="date-btn" tabindex="0" type="button" name="last7Days" @click=${this.handleLast7Days}><span class="MuiButton-label">Last 7 days</span></button></div>
+          <div class="button-item"><button id="last30DaysBtn" class="date-btn" tabindex="0" type="button" name="last30Days" @click=${this.handleLast30Days}><span class="MuiButton-label">Last 30 days</span></button></div>
+          <div class="button-item"><button id="last3MosBtn" class="date-btn" tabindex="0" type="button" name="last3Mos" @click=${this.handleLast3Months}><span class="MuiButton-label">Last 3 months</span></button></div>
+          <div class="button-item"><button id="last6MosBtn" class="date-btn" tabindex="0" type="button" name="last6Mos" @click=${this.handleLast6Months}><span class="MuiButton-label">Last 6 months</span></button></div>
+          <div class="button-item"><button id="customBtn" class="date-btn" tabindex="0" type="button" name="custom" style="pointer-events: none;"><span class="MuiButton-label">Custom</span></button></div>
+      </div>
+    </div>`;
+  };
 
   renderSingleCalendar = () => {
     return html `<div class="mv-single-calendar-container ${this.style}">
-      <div class="button-container">
-        <div class="button-list">
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="today"><span class="MuiButton-label">Today</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="yesterday"><span class="MuiButton-label">Yesterday</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last7Days"><span class="MuiButton-label">Last 7 days</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last30Days"><span class="MuiButton-label">Last 30 days</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last3Mos"><span class="MuiButton-label">Last 3 months</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last6Mos"><span class="MuiButton-label">Last 6 months</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="custom" style="pointer-events: none;"><span class="MuiButton-label">Custom</span></button></div>
-        </div>
-      </div>
-      <div class="calendar">
+      ${this.renderFilterButtonContainer()}
+      <div id="currentMonthCalendar" class="calendar">
         <div class="calendar-column-item text-field-container">
             <div class="date-text-field"><input id="startDateField" name="start-date" type="text" placeholder="Select start date" readonly></div>
         </div>
         <div class="calendar-column-item">
           <div class="datepicker">
             <div class="datepicker__triangle"></div>
-            <button type="button" class="datepicker__navigation datepicker__navigation--previous" @click="${this.previous}">Previous Month</button>
-            <button type="button" class="datepicker__navigation datepicker__navigation--next" @click="${this.next}">Next month</button>
+            <button type="button" class="datepicker__navigation datepicker__navigation--previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous Month</button>
+            <button type="button" class="datepicker__navigation datepicker__navigation--next" @click="${this.next(this.currentYear, this.currentMonth)}">Next month</button>
             <div class="month-container">
               <div class="month-year-header">
                 <div class="card-header" id="monthAndYear"></div>
@@ -474,26 +417,16 @@ export class MvCalendar extends LitElement {
 
   renderRangeCalendar = () => {
     return html `<div class="mv-range-calendar-container ${this.style}">
-      <div class="button-container">
-        <div class="button-list">
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="today"><span class="MuiButton-label">Today</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="yesterday"><span class="MuiButton-label">Yesterday</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last7Days"><span class="MuiButton-label">Last 7 days</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last30Days"><span class="MuiButton-label">Last 30 days</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last3Mos"><span class="MuiButton-label">Last 3 months</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="last6Mos"><span class="MuiButton-label">Last 6 months</span></button></div>
-            <div class="button-item"><button class="date-btn" tabindex="0" type="button" name="custom" style="pointer-events: none;"><span class="MuiButton-label">Custom</span></button></div>
-        </div>
-      </div>
-      <div class="calendar">
+      ${this.renderFilterButtonContainer()}
+      <div id="currentMonthCalendar" class="calendar">
         <div class="calendar-column-item text-field-container">
             <div class="date-text-field"><input id="startDateField" name="start-date" type="text" placeholder="Select start date" readonly></div>
         </div>
         <div class="calendar-column-item">
           <div class="datepicker">
             <div class="datepicker__triangle"></div>
-            <button type="button" class="datepicker__navigation datepicker__navigation--previous" @click="${this.previous}">Previous Month</button>
-            <button type="button" class="datepicker__navigation datepicker__navigation--next" @click="${this.next}">Next month</button>
+            <button type="button" class="datepicker__navigation datepicker__navigation--previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous Month</button>
+            <button type="button" class="datepicker__navigation datepicker__navigation--next" @click="${this.next(this.currentYear, this.currentMonth)}">Next month</button>
             <div class="month-container">
               <div class="month-year-header">
                 <div class="card-header" id="monthAndYear"></div>
@@ -512,15 +445,15 @@ export class MvCalendar extends LitElement {
         </div>
       </div>
       <div class="text-filter-to">to</div>
-        <div class="calendar">
+        <div id="nextMonthCalendar" class="calendar">
           <div class="calendar-column-item text-field-container">
               <div class="date-text-field"><input id="endDateField" name="end-date-" type="text" placeholder="Select start date" readonly></div>
           </div>
           <div class="calendar-column-item">
             <div class="datepicker">
               <div class="datepicker__triangle"></div>
-              <button type="button" class="datepicker__navigation datepicker__navigation--previous" @click="${this.previous}">Previous Month</button>
-              <button type="button" class="datepicker__navigation datepicker__navigation--next" @click="${this.next}">Next month</button>
+              <button type="button" class="datepicker__navigation datepicker__navigation--previous" @click="${this.previous(this.nextYear, this.nextMonth, false)}">Previous Month</button>
+              <button type="button" class="datepicker__navigation datepicker__navigation--next" @click="${this.next(this.nextYear, this.nextMonth, false)}">Next month</button>
               <div class="month-container">
                 <div class="month-year-header">
                   <div class="card-header" id="nextMonthAndYear"></div>
@@ -546,8 +479,8 @@ export class MvCalendar extends LitElement {
       <div class="month-year-header">
         <div class="card-header" id="monthAndYear"></div>
         <div class="prev-next-container">
-          <button class="navigation" id="previous" @click="${this.previous}">Previous</button>
-          <button class="navigation" id="next" @click="${this.next}">Next</button>
+          <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
+          <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
         </div>
       </div>
       <table class="table" id="calendar">
@@ -562,37 +495,267 @@ export class MvCalendar extends LitElement {
     </div>`;
   };
 
-  renderCalendar = () => {
-    let view = '';
-    if (this.type === 'single') {
-      return html `${this.renderSingleCalendar()}`;
-    } else if (this.type === 'range') {
-      return html `${this.renderRangeCalendar()}`;
-    } else if (this.type === 'input') {
-      return html `${this.renderCalendarWithInputField()}`;
-    } else {
-      return html `${this.renderSingleCalendar()}`;
+  showCalendar = (month, year, tableBody = 'current-month-calendar-body') => {
+    let firstDay = (new Date(year, month)).getDay();
+    let daysInMonth = 32 - new Date(year, month, 32).getDate();
+
+    const tbl = this.renderRoot.querySelector(`#${tableBody}`);
+    const isCurrentMonthTable = tableBody === 'current-month-calendar-body' ? true : false;
+
+    if (tbl) {
+      tbl.innerHTML = "";
+      if (isCurrentMonthTable) {
+        this.monthAndYear.innerHTML = this.months[month] + " " + year;
+      }
+
+      if (!isCurrentMonthTable) {
+        this.nextMonthAndYear.innerHTML = this.months[this.nextMonth] + " " + this.nextYear;
+      }
+
+      let date = 1;
+      for (let i = 0; i < 6; i++) {
+        let row = document.createElement("tr");
+
+        for (let j = 0; j < 7; j++) {
+          if (i === 0 && j < firstDay) {
+              let cell = document.createElement("td");
+              let cellText = document.createTextNode("");
+              let dateContainer = document.createElement("div");
+              dateContainer.classList.add('date-container', tableBody);
+              dateContainer.appendChild(cellText);
+              cell.appendChild(dateContainer);
+              row.appendChild(cell);
+          }
+          else if (date > daysInMonth) {
+              break;
+          } else {
+            let cell = document.createElement("td");
+            let dateContainer = document.createElement("div");
+            let cellText = document.createTextNode(date);
+            const calendarDate = new Date(`${month + 1}/${date}/${year}`);
+            dateContainer.classList.add('date-container', tableBody);
+            if (date === this.today.getDate() && year === this.today.getFullYear() && month === this.today.getMonth()) {
+                dateContainer.classList.add("current-date");
+            }
+            if (this.startDate && this.endDate) {
+              if (calendarDate >= this.startDate && calendarDate <= this.endDate) {
+                this.highlightDateCell(dateContainer);
+              }
+            }
+
+            if (isCurrentMonthTable && this.startDate && date === this.startDate.getDate() && year === this.startDate.getFullYear() && month === this.startDate.getMonth()) {
+              this.highlightDateCell(dateContainer);
+            } else if (!isCurrentMonthTable && this.endDate && date === this.endDate.getDate() && year === this.endDate.getFullYear() && month === this.endDate.getMonth()) {
+              this.highlightDateCell(dateContainer);
+            }
+            cell.classList.add(tableBody);
+            dateContainer.id = `${tableBody}-${date}`;
+            if (isCurrentMonthTable) {
+              cell.addEventListener('click', this.selectStartDate(dateContainer));
+            } else {
+              cell.addEventListener('click', this.selectEndDate(dateContainer));
+            }
+
+            dateContainer.appendChild(cellText);
+            cell.appendChild(dateContainer);
+            row.appendChild(cell);
+            date++;
+          }
+        }
+
+        tbl.appendChild(row);
+      }
     }
   };
 
-  firstUpdated(changedProperties) {
-    this.selectYear = this.renderRoot.getElementById("year");
-    this.selectMonth = this.renderRoot.getElementById("month");
-    this.monthAndYear = this.renderRoot.getElementById("monthAndYear");
-    this.nextMonthAndYear = this.renderRoot.getElementById("nextMonthAndYear");
-    this.startDateField = this.renderRoot.getElementById("startDateField");
-    this.showCalendar(this.currentMonth, this.currentYear);
-    if (this.type === 'range') {
-      this.endDateField = this.renderRoot.getElementById("endDateField");
-      this.showCalendar(this.currentMonth, this.currentYear, 'next-month-calendar-body');
+  highlightDateCell = (cell) => {
+    cell.classList.add("bg-info");
+  };
+
+  removeHighlightedDateCell = (cell, tableCss = 'current-month-calendar-body') => {
+    const highlightedCells = this.renderRoot.querySelectorAll(`.${tableCss} .bg-info`);
+    for (let i=0;i < highlightedCells.length; i++) {
+      highlightedCells[i].classList.remove("bg-info");
     }
+  };
+
+  previous = (year, month, isCurrentMonth = true) => () => {
+    if (!isCurrentMonth) {
+      this.nextYear = (this.nextMonth === 0) ? this.nextYear - 1 : this.nextYear;
+      this.nextMonth = (this.nextMonth === 0) ? 11 : this.nextMonth - 1;
+      this.showCalendar(this.nextMonth, this.nextYear, 'next-month-calendar-body');
+    } else {
+      this.currentYear = (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
+      this.currentMonth = (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
+      this.showCalendar(this.currentMonth, this.currentYear);
+    }
+  };
+
+  next = (year, month, isCurrentMonth = true) => () => {
+    if (!isCurrentMonth) {
+      this.nextYear = (this.nextMonth === 11) ? this.nextYear + 1 : this.nextYear;
+      this.nextMonth = (this.nextMonth + 1) % 12;
+      this.showCalendar(this.nextMonth, this.nextYear, 'next-month-calendar-body');
+    } else {
+      this.currentYear = (this.currentMonth === 11) ? this.currentYear + 1 : this.currentYear;
+      this.currentMonth = (this.currentMonth + 1) % 12;
+      this.showCalendar(this.currentMonth, this.currentYear);
+    }
+  };
+
+  jump = () => {
+    this.currentYear = parseInt(this.selectYear.value);
+    this.currentMonth = parseInt(this.selectMonth.value);
+    this.showCalendar(this.currentMonth, this.currentYear);
   }
 
-  render() {
-    return html `
-      ${this.renderCalendar()}
-    `;
+  getFormattedDate = (date) => {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
   }
+
+  setDateRange = () => {
+    const currentMonthContainer = this.renderRoot.getElementById(`current-month-calendar-body-${this.endDate.getDate()}`);
+    if (currentMonthContainer) {
+      const customBtn = this.renderRoot.getElementById('customBtn');
+      this.currentYear = this.startDate.getFullYear();
+      this.currentMonth = this.startDate.getMonth();
+      customBtn.classList.remove('filter-btn-selected');
+      this.showCalendar(this.startDate.getMonth(), this.startDate.getFullYear());
+      this.getSelectedDate(currentMonthContainer);
+    }
+    if (this.type === 'range') {
+      const nextMonthContainer = this.renderRoot.getElementById(`next-month-calendar-body-${this.endDate.getDate()}`);
+      if (nextMonthContainer) {
+        const customBtn = this.renderRoot.getElementById('customBtn');
+        this.nextYear = this.endDate.getFullYear();
+        this.nextMonth = this.endDate.getMonth();
+        customBtn.classList.remove('filter-btn-selected');
+        this.showCalendar(this.endDate.getMonth(), this.endDate.getFullYear(), 'next-month-calendar-body');
+        this.getSelectedDate(nextMonthContainer);
+      }
+    }
+  };
+
+  getSelectedDate = (cell) => {
+    if (cell.classList.contains('current-month-calendar-body')) {
+      this.startDate = new Date(this.currentYear, this.currentMonth, cell.innerText);
+      this.startDateField.value = this.getFormattedDate(this.startDate);
+    }
+
+    if (cell.classList.contains('next-month-calendar-body')) {
+      this.endDate = new Date(this.nextYear, this.nextMonth, cell.innerText);
+      this.endDateField.value = this.getFormattedDate(this.endDate);
+    }
+
+    return {
+      startDate: this.startDate,
+      endDate: this.endDate };
+  };
+
+  selectStartDate = (cell) => () => {
+    const selectedDate = this.getSelectedDate(cell);
+    this.removeHighlightedDateCell(cell);
+    this.highlightDateCell(cell);
+    if (this.type !== 'range') {
+        this.endDate = null;
+        this.resetFilterButtonSelection();
+    } else {
+      if (selectedDate.startDate && selectedDate.endDate) {
+        this.resetFilterButtonSelection();
+        this.setFilterButtonSelection('customBtn');
+        this.showCalendar(selectedDate.startDate.getMonth(), selectedDate.startDate.getFullYear());
+        this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
+      }
+    }
+  };
+
+  selectEndDate = (cell) => () => {
+    const tableCss = 'next-month-calendar-body';
+    const selectedDate = this.getSelectedDate(cell);
+    this.removeHighlightedDateCell(cell, tableCss);
+    this.highlightDateCell(cell);
+    if (this.type !== 'range') {
+        this.startDate = null;
+        this.resetFilterButtonSelection();
+    } else {
+      if (selectedDate.startDate && selectedDate.endDate) {
+        this.resetFilterButtonSelection();
+        this.setFilterButtonSelection('customBtn');
+        this.showCalendar(selectedDate.startDate.getMonth(), selectedDate.startDate.getFullYear());
+        this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
+      }
+    }
+  };
+
+  setFilterButtonSelection = (buttonId) => {
+    const button = this.renderRoot.getElementById(buttonId);
+    if (button) {
+      button.classList.add('filter-btn-selected');
+    }
+  };
+
+  resetFilterButtonSelection = () => {
+    const filterButtons = this.renderRoot.querySelectorAll('.date-btn');
+    for (let i=0;i < filterButtons.length; i++) {
+      filterButtons[i].classList.remove("filter-btn-selected");
+    }
+  };
+
+  handleDateToday = () => {
+    this.startDate = new Date();
+    this.endDate = this.startDate;
+    this.resetFilterButtonSelection();
+    this.setFilterButtonSelection('todayBtn');
+    this.setDateRange();
+  }
+
+  handleDateYesterday = () => {
+    this.startDate = new Date();
+    this.startDate.setDate(this.today.getDate() - 1);
+    this.endDate = this.startDate;
+    this.resetFilterButtonSelection();
+    this.setFilterButtonSelection('yesterdayBtn');
+    this.setDateRange();
+  }
+
+  handleLast7Days = () => {
+    this.startDate = new Date();
+    this.endDate = new Date();
+    this.startDate.setDate(this.today.getDate() - 7);
+    this.resetFilterButtonSelection();
+    this.setFilterButtonSelection('last7DaysBtn');
+    this.setDateRange();
+  };
+
+  handleLast30Days = () => {
+    this.startDate = new Date();
+    this.endDate = new Date();
+    this.startDate.setDate(this.today.getDate() - 30);
+    this.resetFilterButtonSelection();
+    this.setFilterButtonSelection('last30DaysBtn');
+    this.setDateRange();
+  };
+
+  handleLast3Months = () => {
+    this.startDate = new Date();
+    this.endDate = new Date();
+    this.startDate.setMonth(this.today.getMonth() - 3);
+    this.resetFilterButtonSelection();
+    this.setFilterButtonSelection('last3MosBtn');
+    this.setDateRange();
+  };
+
+  handleLast6Months = () => {
+    this.startDate = new Date();
+    this.endDate = new Date();
+    this.startDate.setMonth(this.today.getMonth() - 6);
+    this.resetFilterButtonSelection();
+    this.setFilterButtonSelection('last6MosBtn');
+    this.setDateRange();
+  };
 }
 
 customElements.define("mv-calendar", MvCalendar);
