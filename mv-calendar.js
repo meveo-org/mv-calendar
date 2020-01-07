@@ -96,7 +96,7 @@ export class MvCalendar extends LitElement {
       };
 
       .month-year-header {
-        font-size: 1rem;
+        font-size: var(--font-size-m);
         text-transform: uppercase;
         padding-bottom: 5px;
         text-align: center;
@@ -175,7 +175,7 @@ export class MvCalendar extends LitElement {
       .table td {
       	vertical-align: top;
         font-family: "MuseoSans", sans-serif;
-        font-size: 1rem;
+        font-size: var(--font-size-m);
         font-weight: 100;
       }
 
@@ -213,7 +213,7 @@ export class MvCalendar extends LitElement {
       	height: 20px;
       	border-radius: 50px;
       	font-family: "MuseoSans",sans-serif;
-      	font-size: 1rem;
+      	font-size: var(--font-size-m);
       	color: #fff;
       	background-color: #3F4753;
       	border: #fff solid 1px;
@@ -272,7 +272,7 @@ export class MvCalendar extends LitElement {
       	position: absolute;
       	left: 50px;
         font-family: "MuseoSans",sans-serif;
-        font-size: 1rem;
+        font-size: var(--font-size-m);
         font-weight: 100;
         color: #000;
       }
@@ -332,7 +332,7 @@ export class MvCalendar extends LitElement {
         color: #ffffff;
         text-transform: none;
         font-family: "MuseoSans",sans-serif;
-        font-size: 1rem;
+        font-size: var(--font-size-m);
         cursor: pointer;
         text-align: center;
         justify-content: left;
@@ -613,11 +613,11 @@ export class MvCalendar extends LitElement {
       }
 
       let date = 1;
-      for (let i = 0; i < 6; i++) {
+      for (let weekRow = 0; weekRow < 6; weekRow++) {
         let row = document.createElement("tr");
 
-        for (let j = 0; j < 7; j++) {
-          if (i === 0 && j < firstDay) {
+        for (let dateRow = 0; dateRow < 7; dateRow++) {
+          if (weekRow === 0 && weekRow < firstDay) {
               let cell = document.createElement("td");
               let cellText = document.createTextNode("");
               let dateContainer = document.createElement("div");
@@ -684,8 +684,8 @@ export class MvCalendar extends LitElement {
 
   removeHighlightedDateCell = (cell, tableCss = 'current-month-calendar-body') => {
     const highlightedCells = this.renderRoot.querySelectorAll(`.${tableCss} .bg-info`);
-    for (let i=0;i < highlightedCells.length; i++) {
-      highlightedCells[i].classList.remove("bg-info");
+    for (let row = 0; row < highlightedCells.length; row++) {
+      highlightedCells[row].classList.remove("bg-info");
     }
   };
 
@@ -818,8 +818,8 @@ export class MvCalendar extends LitElement {
 
   resetFilterButtonSelection = () => {
     const filterButtons = this.renderRoot.querySelectorAll('.date-btn');
-    for (let i=0;i < filterButtons.length; i++) {
-      filterButtons[i].classList.remove("filter-btn-selected");
+    for (let row = 0; row < filterButtons.length; row++) {
+      filterButtons[row].classList.remove('filter-btn-selected');
     }
   };
 
