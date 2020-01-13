@@ -25,7 +25,7 @@ input, button, simple and range
 ```
 
 
-You can also check this [demo(unavailable yet)]()
+You can also check this [demo](https://calendar.meveo.org)
 
 
 ## Acknowledgements
