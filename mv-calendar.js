@@ -16,12 +16,19 @@ export class MvCalendar extends LitElement {
 
   static get styles() {
     return css`
-			:host {
-				font-family: "MuseoSans";
-				font-size: var(--font-size-m, 10pt);
+	  :host {
+		font-family: "MuseoSans";
+		font-size: var(--font-size-m, 10pt);
         font-color: var(--font-color, #3F4753);
-        --max-width: var(--mv-select-max-width, 200px);
         font-weight: 100;
+        --max-width: var(--mv-select-max-width, 200px);
+        --input-background-color: var(--mv-calendar-input-background-color, #FFFFFF);
+        --input-border-input: var(--mv-calendar-input-border-input, solid 1px #4E686D);
+        --input-width: var(--mv-calendar-input-width, 100%);
+        --single-background-color: var(--mv-calendar-single-background-color, #3F4753);
+        --single-button-background-color: var(--mv-calendar-single-button-background-color, #39404B);
+        --hover-background-color: var(--mv-calendar-hover-background-color, #666);
+        --active-background-color: var(--mv-calendar-active-background-color, linear-gradient(to right, #007ADF 0%, #00ECBC 180%));
       }
 
       table {
@@ -32,10 +39,7 @@ export class MvCalendar extends LitElement {
       }
 
       .bg-info {
-        background: -webkit-gradient(linear, left top, right top, from(#007ADF), color-stop(180%, #00ECBC));
-      	background: -webkit-linear-gradient(left, #007ADF 0%, #00ECBC 180%);
-      	background: -o-linear-gradient(left, #007ADF 0%, #00ECBC 180%);
-      	background: linear-gradient(to right, #007ADF 0%, #00ECBC 180%);
+      	background: var(--active-background-color);
       	border-radius: 24px;
       	color: #FFFFFF;
       }
@@ -56,7 +60,7 @@ export class MvCalendar extends LitElement {
         -webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         -moz-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
-        background-color: #3F4753;
+        background-color: var(--single-background-color);
         border-color: #1E3843;
         padding: 5px;
         display: flex;
@@ -71,7 +75,7 @@ export class MvCalendar extends LitElement {
         -webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         -moz-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
-        background-color: #3F4753;
+        background-color: var(--single-background-color);
         border-color: #1E3843;
         padding: 5px;
         display: flex;
@@ -89,6 +93,7 @@ export class MvCalendar extends LitElement {
         color: #000;
         display: none;
         margin-bottom: 25px;
+        background-color: var(--input-background-color);
       }
 
       .show-calendar {
@@ -151,7 +156,7 @@ export class MvCalendar extends LitElement {
       }
 
       .date-container:hover {
-        background-color: #666;
+        background-color: var(--hover-background-color);
       	border-radius: 24px;
       	color: #FFFFFF;
       }
@@ -215,7 +220,7 @@ export class MvCalendar extends LitElement {
       	font-family: "MuseoSans",sans-serif;
       	font-size: var(--font-size-m);
       	color: #fff;
-      	background-color: #3F4753;
+      	background-color: var(--single-background-color);
       	border: #fff solid 1px;
       	padding: 5px 5px;
       	font-weight: 300;
@@ -246,11 +251,11 @@ export class MvCalendar extends LitElement {
       }
 
       .datepicker__input-container {
-        width: 100%;
+        width: var(--input-width);
       }
 
       .datepicker__input-container input {
-        border: solid 1px #4E686D;
+        border: var(--input-border-input);
         width: 100%;
         padding: 5px 5px;
         border-radius: 4px;
@@ -343,7 +348,7 @@ export class MvCalendar extends LitElement {
       }
 
       .button-list .button-item .date-btn {
-      	background-color: #39404B;
+      	background-color: var(--single-button-background-color);
       	-webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
       	box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
       	color: #fff;
@@ -359,7 +364,7 @@ export class MvCalendar extends LitElement {
         min-width: 139px;
         width: 139px;
         height: 324px;
-      	background-color: #3F4753;
+      	background-color: var(--single-background-color);
       	border-radius: 5px 0px 0px 5px;
       	-webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
       	box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
