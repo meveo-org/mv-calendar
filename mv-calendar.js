@@ -11,24 +11,35 @@ export class MvCalendar extends LitElement {
       name: { type: String },
       type: { type: String },
       style: { type: String },
+
+      //  valid theme values are: "light", "dark"
+      //    default: "dark"
+      theme: { type: String, attribute: true }
     };
   }
 
   static get styles() {
     return css`
-	  :host {
-		font-family: "MuseoSans";
-		font-size: var(--font-size-m, 10pt);
+      :host {
+        font-family: "MuseoSans";
+        font-size: var(--font-size-m, 10pt);
         font-color: var(--font-color, #3F4753);
         font-weight: 100;
-        --max-width: var(--mv-select-max-width, 200px);
-        --input-background-color: var(--mv-calendar-input-background-color, #FFFFFF);
-        --input-border-input: var(--mv-calendar-input-border-input, solid 1px #4E686D);
+        --max-width: var(--mv-calendar-select-max-width, 200px);
         --input-width: var(--mv-calendar-input-width, 100%);
-        --single-background-color: var(--mv-calendar-single-background-color, #3F4753);
-        --single-button-background-color: var(--mv-calendar-single-button-background-color, #39404B);
+        --input-border-input: var(--mv-calendar-input-border-input, solid 1px #4E686D);
         --hover-background-color: var(--mv-calendar-hover-background-color, #666);
         --active-background-color: var(--mv-calendar-active-background-color, linear-gradient(to right, #007ADF 0%, #00ECBC 180%));
+        --input-light-background: var(--mv-calendar-input-light-background, #FFFFFF);
+        --input-light-color: var(--mv-calendar-input-light-color, #000);
+        --input-dark-background: var(--mv-calendar-input-dark-background, #3F4753);
+        --input-dark-color: var(--mv-calendar-input-dark-color, #FFFFFF);
+        --single-light-background: var(--mv-calendar-single-light-background, #FFFFFF);
+        --single-button-light-background: var(--mv-calendar-single-button-light-background, #B0B3B6);
+        --single-light-color: var(--mv-calendar-single-light-color, #000);
+        --single-dark-background: var(--mv-calendar-single-dark-background, #3F4753);
+        --single-button-dark-background: var(--mv-calendar-single-button-dark-background, #39404B);
+        --single-dark-color: var(--mv-calendar-single-dark-color, #FFFFFF);
       }
 
       table {
@@ -65,12 +76,12 @@ export class MvCalendar extends LitElement {
         padding: 5px;
         display: flex;
         border-radius: 5px;
-        color: #fff;
+        color: var(--single-color);
       }
 
       .mv-range-calendar-container {
-        min-width: var(--mv-container-min-width, 730px);
-        max-width: var(--mv-container-max-width, 730px);
+        min-width: var(--mv-calendar-container-min-width, 730px);
+        max-width: var(--mv-calendar-container-max-width, 730px);
         height: 325px;
         -webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         -moz-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
@@ -80,7 +91,7 @@ export class MvCalendar extends LitElement {
         padding: 5px;
         display: flex;
         border-radius: 5px;
-        color: #fff;
+        color: var(--single-color);
       }
 
       .mv-popup-calendar-container {
@@ -90,7 +101,7 @@ export class MvCalendar extends LitElement {
         -moz-box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
         box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
         padding: 5px;
-        color: #000;
+        color: var(--input-color);
         display: none;
         margin-bottom: 25px;
         background-color: var(--input-background-color);
@@ -168,12 +179,12 @@ export class MvCalendar extends LitElement {
       }
 
       #previous {
-        border-right-color: black;
+        border-right-color: var(--input-color);
 	      left: 0;
       }
 
       #next {
-        border-left-color: black;
+        border-left-color: var(--input-color);
         right: 0;
       }
 
@@ -219,9 +230,9 @@ export class MvCalendar extends LitElement {
       	border-radius: 50px;
       	font-family: "MuseoSans",sans-serif;
       	font-size: var(--font-size-m);
-      	color: #fff;
+      	color: var(--single-color);
       	background-color: var(--single-background-color);
-      	border: #fff solid 1px;
+      	border: var(--single-color) solid 1px;
       	padding: 5px 5px;
       	font-weight: 300;
       }
@@ -288,7 +299,7 @@ export class MvCalendar extends LitElement {
         height: 0;
         border-top: 8px solid transparent;
         border-bottom: 8px solid transparent;
-        border-right:8px solid #ccc;
+        border-right:8px solid var(--single-color);
         border-left: 0;
       }
 
@@ -298,7 +309,7 @@ export class MvCalendar extends LitElement {
         height: 0;
         border-top: 8px solid transparent;
         border-bottom: 8px solid transparent;
-        border-left: 8px solid #ccc;
+        border-left: 8px solid var(--single-color);
         border-right: 0;
       }
 
@@ -351,7 +362,7 @@ export class MvCalendar extends LitElement {
       	background-color: var(--single-button-background-color);
       	-webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
       	box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
-      	color: #fff;
+      	color: var(--single-color);
       	font-weight: 100;
       	padding-top: 5px;
       	padding-right: 7px;
@@ -374,6 +385,22 @@ export class MvCalendar extends LitElement {
       	-ms-flex-direction: column;
       	flex-direction: column;
       	text-align: center;
+      }
+      
+      .light {
+        --input-background-color: var(--input-light-background);
+        --input-color: var(--input-light-color);
+        --single-background-color: var(--single-light-background);
+        --single-button-background-color: var(--single-button-light-background);
+        --single-color: var(--single-light-color);
+      }
+      
+      .dark {
+        --input-background-color: var(--input-dark-background);
+        --input-color: var(--input-dark-color);
+        --single-background-color: var(--single-dark-background);
+        --single-button-background-color: var(--single-button-dark-background);
+        --single-color: var(--single-dark-color);
       }
 		`;
   }
@@ -398,6 +425,7 @@ export class MvCalendar extends LitElement {
     this.type = 'single';
     this.startDate = null;
     this.endDate = null;
+    this.theme = "dark";
   }
 
   firstUpdated(changedProperties) {
@@ -437,7 +465,7 @@ export class MvCalendar extends LitElement {
   };
 
   renderFilterButtonContainer = () => {
-    return html `<div class="button-container">
+    return html `<div class="button-container ${this.theme}">
       <div class="button-list">
           <div class="button-item"><button id="todayBtn" class="date-btn" tabindex="0" type="button" name="today" @click=${this.handleDateToday}><span class="MuiButton-label">Today</span></button></div>
           <div class="button-item"><button id="yesterdayBtn" class="date-btn" tabindex="0" type="button" name="yesterday" @click=${this.handleDateYesterday}><span class="MuiButton-label">Yesterday</span></button></div>
@@ -451,7 +479,7 @@ export class MvCalendar extends LitElement {
   };
 
   renderSingleCalendar = () => {
-    return html `<div class="mv-single-calendar-container ${this.style}">
+    return html `<div class="mv-single-calendar-container ${this.style} ${this.theme}">
       ${this.renderFilterButtonContainer()}
       <div id="currentMonthCalendar" class="calendar">
         <div class="calendar-column-item text-field-container">
@@ -483,7 +511,7 @@ export class MvCalendar extends LitElement {
   };
 
   renderRangeCalendar = () => {
-    return html `<div class="mv-range-calendar-container ${this.style}">
+    return html `<div class="mv-range-calendar-container ${this.style} ${this.theme}">
       ${this.renderFilterButtonContainer()}
       <div id="currentMonthCalendar" class="calendar">
         <div class="calendar-column-item text-field-container">
@@ -543,7 +571,7 @@ export class MvCalendar extends LitElement {
 
   renderCalendarWithInputField = () => {
     return html `
-    <div class="datepicker-wrapper">
+    <div class="datepicker-wrapper ${this.theme}">
       <div class="datepicker__input-container">
         <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" @focus=${this.showPopupCalendar} readonly>
       </div>
@@ -571,7 +599,7 @@ export class MvCalendar extends LitElement {
 
   renderCalendarWithButton = () => {
     return html `
-    <div class="datepicker-wrapper">
+    <div class="datepicker-wrapper ${this.theme}">
       <div class="calendar-button-container">
         <div class="datepicker__input-container">
           <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" readonly>

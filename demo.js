@@ -1,10 +1,13 @@
 import { LitElement, html, css } from "lit-element";
+import "mv-font-awesome";
 import "./mv-calendar.js";
 
 export class MvCalendarDemo extends LitElement {
   static get properties() {
     return {
-      value: { type: String, attribute: true }
+      value: { type: String, attribute: true },
+      open: { type: Boolean, attribute: true },
+      theme: { type: String, attribute: true }
     };
   }
 
@@ -23,23 +26,52 @@ export class MvCalendarDemo extends LitElement {
       mv-calendar {
         width: 50%;
       }
+      
+      mv-fa[icon="lightbulb"] {
+        font-size: 50px;
+        cursor: pointer;
+        margin: 20px;
+      }
+      
+      .theme {
+        display: flex;
+        justify-content: flex-start;
+      }
     `;
+  }
+
+  constructor() {
+    super();
+    this.open = false;
+    this.theme = "dark";
   }
 
   render() {
     return html `
+      <div class="theme">
+        <mv-fa icon="lightbulb" style="color: ${this.open ? "yellow" : ""}" @click=${this.toggleLightBulb}></mv-fa>
+      </div>
       <div class="main">
         <h4>Calendar with input field</h4>
-        <mv-calendar id="input" name="inputCalendar" type="input" style="light"></mv-calendar>
+        <mv-calendar id="input" name="inputCalendar" type="input" .theme="${this.theme}"></mv-calendar>
         <h4>Calendar with button</h4>
-        <mv-calendar id="button" name="buttonCalendar" type="button" style="light"></mv-calendar>
+        <mv-calendar id="button" name="buttonCalendar" type="button" .theme="${this.theme}"></mv-calendar>
         <h4>Single Calendar</h4>
-        <mv-calendar id="simple" name="simpleCalendar" type="simple" style="dark"></mv-calendar>
+        <mv-calendar id="simple" name="simpleCalendar" type="simple" .theme="${this.theme}"></mv-calendar>
         <h4>Calendar with date range</h4>
-        <mv-calendar id="range" name="rangeCalendar" type="range" style="dark"></mv-calendar>
+        <mv-calendar id="range" name="rangeCalendar" type="range" .theme="${this.theme}"></mv-calendar>
       </div>
     `;
   }
+
+  toggleLightBulb = () => {
+    this.open = !this.open;
+    if (this.open) {
+      this.theme = "light";
+    } else {
+      this.theme = "dark";
+    }
+  };
 }
 
 customElements.define("mv-calendar-demo", MvCalendarDemo);
