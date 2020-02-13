@@ -549,7 +549,7 @@ export class MvCalendar extends LitElement {
       <div class="text-filter-to">to</div>
         <div id="nextMonthCalendar" class="calendar">
           <div class="calendar-column-item text-field-container">
-              <div class="date-text-field"><input id="endDateField" name="end-date-" type="text" placeholder="Select start date" readonly></div>
+              <div class="date-text-field"><input id="endDateField" name="end-date-" type="text" placeholder="Select end date" readonly></div>
           </div>
           <div class="calendar-column-item">
             <div class="datepicker">
@@ -687,7 +687,7 @@ export class MvCalendar extends LitElement {
             if (date === this.today.getDate() && year === this.today.getFullYear() && month === this.today.getMonth()) {
                 dateContainer.classList.add("current-date");
             }
-            if (this.startDate && this.endDate) {              
+            if (this.startDate && this.endDate) {
               if (calendarDate >= this.startDate && calendarDate <= this.endDate) {
                 this.highlightDateCell(dateContainer);
               }
