@@ -40,6 +40,14 @@ export class MvCalendar extends LitElement {
         --single-dark-background: var(--mv-calendar-single-dark-background, #3F4753);
         --single-button-dark-background: var(--mv-calendar-single-button-dark-background, #39404B);
         --single-dark-color: var(--mv-calendar-single-dark-color, #FFFFFF);
+        --single-calendar-min-width: var(--mv-single-calendar-min-width, 300px);
+        --single-calendar-max-width: var(--mv-single-calendar-max-width, 300px);
+        --range-calendar-min-width: var(--mv-range-calendar-min-width, 730px);
+        --range-calendar-max-width: var(--mv-range-calendar-max-width, 730px);
+        --popup-calendar-min-width: var(--mv-popup-calendar-min-width, 365px);
+        --popup-calendar-max-width: var(--mv-popup-calendar-max-width, 365px);
+        --calendar-height: var(--mv-calendar-height, 325px);
+
       }
 
       table {
@@ -65,9 +73,9 @@ export class MvCalendar extends LitElement {
       }
 
       .mv-single-calendar-container {
-        min-width: var(--mv-container-min-width, 420px);
-        max-width: var(--mv-container-max-width, 420px);
-        height: 325px;
+        min-width: var(--single-calendar-min-width);
+        max-width: var(--single-calendar-max-width);
+        height: var(--calendar-height);
         -webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         -moz-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
@@ -80,9 +88,9 @@ export class MvCalendar extends LitElement {
       }
 
       .mv-range-calendar-container {
-        min-width: var(--mv-calendar-container-min-width, 730px);
-        max-width: var(--mv-calendar-container-max-width, 730px);
-        height: 325px;
+        min-width: var(--range-calendar-min-width);
+        max-width: var(--mv-range-calendar-max-width, 730px);
+        height: var(--calendar-height);
         -webkit-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         -moz-box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
         box-shadow: 0px 0px 20px 1px rgba(93,94,97,0.35);
@@ -95,8 +103,8 @@ export class MvCalendar extends LitElement {
       }
 
       .mv-popup-calendar-container {
-        min-width: var(--mv-container-min-width, 365px);
-        max-width: var(--mv-container-max-width, 365px);
+        min-width: var(--popup-calendar-min-width);
+        max-width: var(--popup-calendar-max-width);
         -webkit-box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
         -moz-box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
         box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
@@ -386,7 +394,7 @@ export class MvCalendar extends LitElement {
       	flex-direction: column;
       	text-align: center;
       }
-      
+
       .light {
         --input-background-color: var(--input-light-background);
         --input-color: var(--input-light-color);
@@ -394,7 +402,7 @@ export class MvCalendar extends LitElement {
         --single-button-background-color: var(--single-button-light-background);
         --single-color: var(--single-light-color);
       }
-      
+
       .dark {
         --input-background-color: var(--input-dark-background);
         --input-color: var(--input-dark-color);
@@ -480,10 +488,9 @@ export class MvCalendar extends LitElement {
 
   renderSingleCalendar = () => {
     return html `<div class="mv-single-calendar-container ${this.style} ${this.theme}">
-      ${this.renderFilterButtonContainer()}
       <div id="currentMonthCalendar" class="calendar">
         <div class="calendar-column-item text-field-container">
-            <div class="date-text-field"><input id="startDateField" name="start-date" type="text" placeholder="Select start date" readonly></div>
+            <div class="date-text-field"><input id="startDateField" name="start-date" type="text" placeholder="Select date" readonly></div>
         </div>
         <div class="calendar-column-item">
           <div class="datepicker">
@@ -680,7 +687,7 @@ export class MvCalendar extends LitElement {
             if (date === this.today.getDate() && year === this.today.getFullYear() && month === this.today.getMonth()) {
                 dateContainer.classList.add("current-date");
             }
-            if (this.startDate && this.endDate) {
+            if (this.startDate && this.endDate) {              
               if (calendarDate >= this.startDate && calendarDate <= this.endDate) {
                 this.highlightDateCell(dateContainer);
               }
@@ -691,6 +698,7 @@ export class MvCalendar extends LitElement {
             } else if (!isCurrentMonthTable && this.endDate && date === this.endDate.getDate() && year === this.endDate.getFullYear() && month === this.endDate.getMonth()) {
               this.highlightDateCell(dateContainer);
             }
+
             cell.classList.add(tableBody);
             dateContainer.id = `${tableBody}-${date}`;
             if (isCurrentMonthTable) {
@@ -761,13 +769,14 @@ export class MvCalendar extends LitElement {
 
   setDateRange = () => {
     const currentMonthContainer = this.renderRoot.getElementById(`current-month-calendar-body-${this.endDate.getDate()}`);
+    const isRange = true;
     if (currentMonthContainer) {
       const customBtn = this.renderRoot.getElementById('customBtn');
       this.currentYear = this.startDate.getFullYear();
       this.currentMonth = this.startDate.getMonth();
       customBtn.classList.remove('filter-btn-selected');
       this.showCalendar(this.startDate.getMonth(), this.startDate.getFullYear());
-      this.getSelectedDate(currentMonthContainer);
+      this.getSelectedDate(currentMonthContainer, isRange);
     }
     if (this.type === 'range') {
       const nextMonthContainer = this.renderRoot.getElementById(`next-month-calendar-body-${this.endDate.getDate()}`);
@@ -777,21 +786,21 @@ export class MvCalendar extends LitElement {
         this.nextMonth = this.endDate.getMonth();
         customBtn.classList.remove('filter-btn-selected');
         this.showCalendar(this.endDate.getMonth(), this.endDate.getFullYear(), 'next-month-calendar-body');
-        this.getSelectedDate(nextMonthContainer);
+        this.getSelectedDate(nextMonthContainer, isRange);
       }
     }
   };
 
-  getSelectedDate = (cell) => {
+  getSelectedDate = (cell, isRange = false) => {
     if (cell.classList.contains('current-month-calendar-body')) {
-      this.startDate = new Date(this.currentYear, this.currentMonth, cell.innerText);
+      this.startDate = !isRange ? new Date(this.currentYear, this.currentMonth, cell.innerText) : this.startDate;
       if (this.startDateField) {
         this.startDateField.value = this.getFormattedDate(this.startDate);
       }
     }
 
     if (cell.classList.contains('next-month-calendar-body')) {
-      this.endDate = new Date(this.nextYear, this.nextMonth, cell.innerText);
+      this.endDate = !isRange ? new Date(this.nextYear, this.nextMonth, cell.innerText) : this.endDate;
       if (this.endDateField) {
         this.endDateField.value = this.getFormattedDate(this.endDate);
       }
@@ -879,7 +888,7 @@ export class MvCalendar extends LitElement {
   }
 
   handleDateYesterday = () => {
-    this.startDate = new Date();
+    this.startDate = new Date(new Date().setHours(0, 0, 0, 0));
     this.startDate.setDate(this.today.getDate() - 1);
     this.endDate = this.startDate;
     this.resetFilterButtonSelection();
@@ -888,36 +897,40 @@ export class MvCalendar extends LitElement {
   }
 
   handleLast7Days = () => {
-    this.startDate = new Date();
-    this.endDate = new Date();
+    this.startDate = new Date(new Date().setHours(0, 0, 0, 0));
+    this.endDate = new Date(new Date().setHours(0, 0, 0, 0));
     this.startDate.setDate(this.today.getDate() - 7);
+    this.endDate.setDate(this.today.getDate() - 1);
     this.resetFilterButtonSelection();
     this.setFilterButtonSelection('last7DaysBtn');
     this.setDateRange();
   };
 
   handleLast30Days = () => {
-    this.startDate = new Date();
-    this.endDate = new Date();
+    this.startDate = new Date(new Date().setHours(0, 0, 0, 0));
+    this.endDate = new Date(new Date().setHours(0, 0, 0, 0));
     this.startDate.setDate(this.today.getDate() - 30);
+    this.endDate.setDate(this.today.getDate() - 1);
     this.resetFilterButtonSelection();
     this.setFilterButtonSelection('last30DaysBtn');
     this.setDateRange();
   };
 
   handleLast3Months = () => {
-    this.startDate = new Date();
-    this.endDate = new Date();
+    this.startDate = new Date(new Date().setHours(0, 0, 0, 0));
+    this.endDate = new Date(new Date().setHours(0, 0, 0, 0));
     this.startDate.setMonth(this.today.getMonth() - 3);
+    this.endDate.setDate(this.today.getDate() - 1);
     this.resetFilterButtonSelection();
     this.setFilterButtonSelection('last3MosBtn');
     this.setDateRange();
   };
 
   handleLast6Months = () => {
-    this.startDate = new Date();
-    this.endDate = new Date();
+    this.startDate = new Date(new Date().setHours(0, 0, 0, 0));
+    this.endDate = new Date(new Date().setHours(0, 0, 0, 0));
     this.startDate.setMonth(this.today.getMonth() - 6);
+    this.endDate.setDate(this.today.getDate() - 1);
     this.resetFilterButtonSelection();
     this.setFilterButtonSelection('last6MosBtn');
     this.setDateRange();
