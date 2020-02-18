@@ -1,5 +1,7 @@
 import { LitElement, html, css } from "lit-element";
 import { MvLinearIcon, ICONS } from "mv-linear-icons";
+import "mv-click-away";
+import "mv-dropdown";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -10,8 +12,6 @@ export class MvCalendar extends LitElement {
       value: { type: String, attribute: true },
       name: { type: String },
       type: { type: String },
-      style: { type: String },
-
       //  valid theme values are: "light", "dark"
       //    default: "dark"
       theme: { type: String, attribute: true }
@@ -47,7 +47,7 @@ export class MvCalendar extends LitElement {
         --popup-calendar-min-width: var(--mv-popup-calendar-min-width, 365px);
         --popup-calendar-max-width: var(--mv-popup-calendar-max-width, 365px);
         --calendar-height: var(--mv-calendar-height, 325px);
-
+        --disabled-date-range-background-color: var(--mv-calendar---disabled-date-range-background-color, #ccc);
       }
 
       table {
@@ -57,10 +57,17 @@ export class MvCalendar extends LitElement {
         border-collapse: collapse;
       }
 
-      .bg-info {
+      .selected-dates {
       	background: var(--active-background-color);
       	border-radius: 24px;
       	color: #FFFFFF;
+      }
+
+      .disabled-date-ranges {
+      	background: var(--disabled-date-range-background-color);
+        border-radius: 24px;
+      	color: #FFFFFF;
+        opacity: 0.5;
       }
 
       .filter-btn-selected {
@@ -487,7 +494,7 @@ export class MvCalendar extends LitElement {
   };
 
   renderSingleCalendar = () => {
-    return html `<div class="mv-single-calendar-container ${this.style} ${this.theme}">
+    return html `<div class="mv-single-calendar-container ${this.theme}">
       <div id="currentMonthCalendar" class="calendar">
         <div class="calendar-column-item text-field-container">
             <div class="date-text-field"><input id="startDateField" name="start-date" type="text" placeholder="Select date" readonly></div>
@@ -518,7 +525,7 @@ export class MvCalendar extends LitElement {
   };
 
   renderRangeCalendar = () => {
-    return html `<div class="mv-range-calendar-container ${this.style} ${this.theme}">
+    return html `<div class="mv-range-calendar-container ${this.theme}">
       ${this.renderFilterButtonContainer()}
       <div id="currentMonthCalendar" class="calendar">
         <div class="calendar-column-item text-field-container">
@@ -579,27 +586,33 @@ export class MvCalendar extends LitElement {
   renderCalendarWithInputField = () => {
     return html `
     <div class="datepicker-wrapper ${this.theme}">
-      <div class="datepicker__input-container">
-        <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" @focus=${this.showPopupCalendar} readonly>
-      </div>
-      <div class="mv-popup-calendar-container ${this.style}">
-        <div class="month-year-header input-field">
-          <div class="card-header" id="monthAndYear"></div>
-          <div class="prev-next-container">
-            <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
-            <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
+      <mv-dropdown container justify="left" position="bottom">
+        <mv-dropdown trigger>
+          <div class="datepicker__input-container">
+            <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" @focus=${this.showPopupCalendar} readonly>
           </div>
-        </div>
-        <table class="table" id="calendar">
-          <thead>
-            <tr>
-              ${this.days.map(day => html `<td style='text-align:center'>${day}</td>`)}
-            </tr>
-          </thead>
-          <tbody id="current-month-calendar-body">
-          </tbody>
-        </table>
-      </div>
+        </mv-dropdown>
+        <mv-dropdown content>
+          <div class="mv-popup-calendar-container">
+            <div class="month-year-header input-field">
+              <div class="card-header" id="monthAndYear"></div>
+              <div class="prev-next-container">
+                <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
+                <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
+              </div>
+            </div>
+            <table class="table" id="calendar">
+              <thead>
+                <tr>
+                  ${this.days.map(day => html `<td style='text-align:center'>${day}</td>`)}
+                </tr>
+              </thead>
+              <tbody id="current-month-calendar-body">
+              </tbody>
+            </table>
+          </div>
+        </mv-dropdown>
+      </mv-dropdown>
     </div>
     `;
   };
@@ -607,30 +620,36 @@ export class MvCalendar extends LitElement {
   renderCalendarWithButton = () => {
     return html `
     <div class="datepicker-wrapper ${this.theme}">
-      <div class="calendar-button-container">
-        <div class="datepicker__input-container">
-          <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" readonly>
-        </div>
-        <button class="calendar-btn" @click=${this.showPopupCalendar}><mv-lnr icon="calendar-full"></mv-lnr></button>
-      </div>
-      <div class="mv-popup-calendar-container ${this.style}">
-        <div class="month-year-header input-field">
-          <div class="card-header" id="monthAndYear"></div>
-          <div class="prev-next-container">
-            <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
-            <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
+      <mv-dropdown container justify="left" position="bottom">
+        <mv-dropdown trigger>
+          <div class="calendar-button-container">
+            <div class="datepicker__input-container">
+              <input id="calendarInputField" type="text" .value="${this.getFormattedDate(this.today)}" readonly>
+            </div>
+            <button class="calendar-btn" @click=${this.showPopupCalendar}><mv-lnr icon="calendar-full"></mv-lnr></button>
+          </div>
+        </mv-dropdown>
+        <mv-dropdown content>
+          <div class="mv-popup-calendar-container">
+            <div class="month-year-header input-field">
+              <div class="card-header" id="monthAndYear"></div>
+              <div class="prev-next-container">
+                <button class="navigation" id="previous" @click="${this.previous(this.currentYear, this.currentMonth)}">Previous</button>
+                <button class="navigation" id="next" @click="${this.next(this.currentYear, this.currentMonth)}">Next</button>
+              </div>
+            </div>
+            <table class="table" id="calendar">
+              <thead>
+                <tr>
+                  ${this.days.map(day => html `<td style='text-align:center'>${day}</td>`)}
+                </tr>
+              </thead>
+              <tbody id="current-month-calendar-body">
+              </tbody>
+            </table>
           </div>
         </div>
-        <table class="table" id="calendar">
-          <thead>
-            <tr>
-              ${this.days.map(day => html `<td style='text-align:center'>${day}</td>`)}
-            </tr>
-          </thead>
-          <tbody id="current-month-calendar-body">
-          </tbody>
-        </table>
-      </div>
+      </mv-dropdown>
     </div>
     `;
   };
@@ -687,16 +706,28 @@ export class MvCalendar extends LitElement {
             if (date === this.today.getDate() && year === this.today.getFullYear() && month === this.today.getMonth()) {
                 dateContainer.classList.add("current-date");
             }
-            if (this.startDate && this.endDate) {
-              if (calendarDate >= this.startDate && calendarDate <= this.endDate) {
+
+            if (isCurrentMonthTable) {
+               if(this.startDate && date === this.startDate.getDate() && year === this.startDate.getFullYear() && month === this.startDate.getMonth()) {
+                 this.highlightDateCell(dateContainer);
+               }
+               if(this.endDate && date === this.endDate.getDate() && year === this.endDate.getFullYear() && month === this.endDate.getMonth()) {
+                 this.highlightDateCell(dateContainer);
+               }
+
+            } else if (!isCurrentMonthTable) {
+              if(this.startDate && date === this.startDate.getDate() && year === this.startDate.getFullYear() && month === this.startDate.getMonth()) {
+                this.highlightDateCell(dateContainer);
+              }
+              if (this.endDate && date === this.endDate.getDate() && year === this.endDate.getFullYear() && month === this.endDate.getMonth()) {
                 this.highlightDateCell(dateContainer);
               }
             }
 
-            if (isCurrentMonthTable && this.startDate && date === this.startDate.getDate() && year === this.startDate.getFullYear() && month === this.startDate.getMonth()) {
-              this.highlightDateCell(dateContainer);
-            } else if (!isCurrentMonthTable && this.endDate && date === this.endDate.getDate() && year === this.endDate.getFullYear() && month === this.endDate.getMonth()) {
-              this.highlightDateCell(dateContainer);
+            if (this.startDate && this.endDate) {
+              if (calendarDate > this.startDate && calendarDate < this.endDate) {
+                this.highlightDateCell(dateContainer, 'disabled-date-ranges');
+              }
             }
 
             cell.classList.add(tableBody);
@@ -719,14 +750,20 @@ export class MvCalendar extends LitElement {
     }
   };
 
-  highlightDateCell = (cell) => {
-    cell.classList.add("bg-info");
+  highlightDateCell = (cell, selectedCss = 'selected-dates') => {
+    cell.classList.add(selectedCss);
   };
 
   removeHighlightedDateCell = (cell, tableCss = 'current-month-calendar-body') => {
-    const highlightedCells = this.renderRoot.querySelectorAll(`.${tableCss} .bg-info`);
+    const highlightedCells = this.renderRoot.querySelectorAll(`.${tableCss} .selected-dates`);
+    const disabledCells = this.renderRoot.querySelectorAll(`.${tableCss} .disabled-date-ranges`);
+
+    for (let row = 0; row < disabledCells.length; row++) {
+      disabledCells[row].classList.remove("disabled-date-ranges");
+    }
+
     for (let row = 0; row < highlightedCells.length; row++) {
-      highlightedCells[row].classList.remove("bg-info");
+      highlightedCells[row].classList.remove("selected-dates");
     }
   };
 
@@ -811,7 +848,7 @@ export class MvCalendar extends LitElement {
       endDate: this.endDate };
   };
 
-  selectStartDate = (cell) => () => {
+  selectStartDate = (cell) => (event) => {
     const selectedDate = this.getSelectedDate(cell);
     this.removeHighlightedDateCell(cell);
     this.highlightDateCell(cell);
@@ -831,9 +868,10 @@ export class MvCalendar extends LitElement {
         this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
       }
     }
+    this.hideDropdown(event);
   };
 
-  selectEndDate = (cell) => () => {
+  selectEndDate = (cell) => (event) => {
     const tableCss = 'next-month-calendar-body';
     const selectedDate = this.getSelectedDate(cell);
     this.removeHighlightedDateCell(cell, tableCss);
@@ -849,6 +887,7 @@ export class MvCalendar extends LitElement {
         this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
       }
     }
+    this.hideDropdown(event);
   };
 
   setFilterButtonSelection = (buttonId) => {
@@ -934,6 +973,13 @@ export class MvCalendar extends LitElement {
     this.resetFilterButtonSelection();
     this.setFilterButtonSelection('last6MosBtn');
     this.setDateRange();
+  };
+
+  hideDropdown = event => {
+    const { target } = event;
+    target.dispatchEvent(
+      new CustomEvent("close-mv-dropdown", { bubbles: true })
+    );
   };
 }
 

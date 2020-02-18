@@ -16,6 +16,10 @@ export class MvCalendarDemo extends LitElement {
       :host {
         font-family: var(--font-family, "MuseoSans");
         font-size: var(--font-size-m, 10pt);
+        --mv-calendar-input-width: 320px;
+        --mv-dropdown-max-width: 450px;
+        --mv-dropdown-content-max-height: 325px;
+        --mv-dropdown-trigger-height: 44px;
       }
 
       .main {
@@ -26,13 +30,13 @@ export class MvCalendarDemo extends LitElement {
       mv-calendar {
         width: 50%;
       }
-      
+
       mv-fa[icon="lightbulb"] {
         font-size: 50px;
         cursor: pointer;
         margin: 20px;
       }
-      
+
       .theme {
         display: flex;
         justify-content: flex-start;
@@ -71,6 +75,14 @@ export class MvCalendarDemo extends LitElement {
     } else {
       this.theme = "dark";
     }
+  };
+
+  hideDropdown = event => {
+    console.log('bone bone');
+    const { target } = event;
+    target.dispatchEvent(
+      new CustomEvent("close-mv-dropdown", { bubbles: true })
+    );
   };
 }
 
