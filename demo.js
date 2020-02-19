@@ -57,7 +57,7 @@ export class MvCalendarDemo extends LitElement {
       </div>
       <div class="main">
         <h4>Calendar with input field</h4>
-        <mv-calendar id="input" name="inputCalendar" type="input" .theme="${this.theme}"></mv-calendar>
+        <mv-calendar id="input" name="inputCalendar" type="input" .theme="${this.theme}" @change-date="${this.changeDate}"></mv-calendar>
         <h4>Calendar with button</h4>
         <mv-calendar id="button" name="buttonCalendar" type="button" .theme="${this.theme}"></mv-calendar>
         <h4>Single Calendar</h4>
@@ -83,6 +83,10 @@ export class MvCalendarDemo extends LitElement {
     target.dispatchEvent(
       new CustomEvent("close-mv-dropdown", { bubbles: true })
     );
+  };
+
+  changeDate = event => {
+    const { detail: { startDate, endDate } } = event;
   };
 }
 

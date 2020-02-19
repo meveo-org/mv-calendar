@@ -48,6 +48,7 @@ export class MvCalendar extends LitElement {
         --popup-calendar-max-width: var(--mv-popup-calendar-max-width, 365px);
         --calendar-height: var(--mv-calendar-height, 325px);
         --disabled-date-range-background-color: var(--mv-calendar---disabled-date-range-background-color, #ccc);
+        --input-height: var(--mv-calendar-input-height, 32px);
       }
 
       table {
@@ -120,6 +121,7 @@ export class MvCalendar extends LitElement {
         display: none;
         margin-bottom: 25px;
         background-color: var(--input-background-color);
+        position: absolute;
       }
 
       .show-calendar {
@@ -286,7 +288,7 @@ export class MvCalendar extends LitElement {
         padding: 5px 5px;
         border-radius: 4px;
         font-size: 0.9rem;
-        height: 32px;
+        height: var(--input-height);
         -webkit-transition: border 0.3s;
         -o-transition: border 0.3s;
         transition: border 0.3s;
@@ -842,7 +844,7 @@ export class MvCalendar extends LitElement {
         this.endDateField.value = this.getFormattedDate(this.endDate);
       }
     }
-
+    this.changeDate(this.startDate, this.endDate);
     return {
       startDate: this.startDate,
       endDate: this.endDate };
@@ -979,6 +981,12 @@ export class MvCalendar extends LitElement {
     const { target } = event;
     target.dispatchEvent(
       new CustomEvent("close-mv-dropdown", { bubbles: true })
+    );
+  };
+
+  changeDate = (startDate, endDate) => {
+    this.dispatchEvent(
+      new CustomEvent("change-date", { detail: { startDate, endDate }, bubbles: true })
     );
   };
 }
