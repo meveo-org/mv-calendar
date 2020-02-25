@@ -118,7 +118,7 @@ export class MvCalendar extends LitElement {
         box-shadow: 1px 1px 5px 0px rgba(41,41,41,0.75);
         padding: 5px;
         color: var(--input-color);
-        display: none;
+        display: none;        
         margin-bottom: 25px;
         background-color: var(--input-background-color);
         position: absolute;
@@ -844,7 +844,9 @@ export class MvCalendar extends LitElement {
         this.endDateField.value = this.getFormattedDate(this.endDate);
       }
     }
+
     this.changeDate(this.startDate, this.endDate);
+
     return {
       startDate: this.startDate,
       endDate: this.endDate };
@@ -866,8 +868,17 @@ export class MvCalendar extends LitElement {
       if (selectedDate.startDate && selectedDate.endDate) {
         this.resetFilterButtonSelection();
         this.setFilterButtonSelection('customBtn');
-        this.showCalendar(selectedDate.startDate.getMonth(), selectedDate.startDate.getFullYear());
-        this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
+        if (selectedDate.startDate > selectedDate.endDate) {
+          this.endDate = null;
+          this.endDateField.value = null;
+          this.removeHighlightedDateCell(cell, 'next-month-calendar-body');
+        }
+        if (this.startDate) {
+          this.showCalendar(selectedDate.startDate.getMonth(), selectedDate.startDate.getFullYear());
+        }
+        if (this.endDate) {
+          this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
+        }
       }
     }
     this.hideDropdown(event);
@@ -885,8 +896,17 @@ export class MvCalendar extends LitElement {
       if (selectedDate.startDate && selectedDate.endDate) {
         this.resetFilterButtonSelection();
         this.setFilterButtonSelection('customBtn');
-        this.showCalendar(selectedDate.startDate.getMonth(), selectedDate.startDate.getFullYear());
-        this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
+        if (selectedDate.endDate < selectedDate.startDate) {
+          this.startDate = null;
+          this.startDateField.value = null;
+          this.removeHighlightedDateCell(cell);
+        }
+        if (this.startDate) {
+          this.showCalendar(selectedDate.startDate.getMonth(), selectedDate.startDate.getFullYear());
+        }
+        if (this.endDate) {
+          this.showCalendar(selectedDate.endDate.getMonth(), selectedDate.endDate.getFullYear(), 'next-month-calendar-body');
+        }
       }
     }
     this.hideDropdown(event);
