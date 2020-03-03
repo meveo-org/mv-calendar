@@ -126,7 +126,7 @@ export class MvCalendar extends LitElement {
 
       .show-calendar {
         display: block;
-      };
+      }
 
       .month-year-header {
         font-size: var(--font-size-m);
@@ -419,7 +419,7 @@ export class MvCalendar extends LitElement {
         --single-button-background-color: var(--single-button-dark-background);
         --single-color: var(--single-dark-color);
       }
-		`;
+    `;
   }
 
   constructor() {

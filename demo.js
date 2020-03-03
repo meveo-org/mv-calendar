@@ -1,12 +1,10 @@
 import { LitElement, html, css } from "lit-element";
-import "mv-font-awesome";
 import "./mv-calendar.js";
 
 export class MvCalendarDemo extends LitElement {
   static get properties() {
     return {
       value: { type: String, attribute: true },
-      open: { type: Boolean, attribute: true },
       theme: { type: String, attribute: true }
     };
   }
@@ -32,30 +30,39 @@ export class MvCalendarDemo extends LitElement {
         width: 50%;
       }
 
-      mv-fa[icon="lightbulb"] {
-        font-size: 50px;
+      fieldset > label, label > input {
         cursor: pointer;
-        margin: 20px;
       }
-
-      .theme {
-        display: flex;
-        justify-content: flex-start;
+      
+      fieldset {
+        width: 120px;
+        margin-left: 10px;
+        border:2px solid red;
+        -moz-border-radius:8px;
+        -webkit-border-radius:8px;	
+        border-radius:8px;
+        color: #818181;
+      }
+      
+      legend {
+        font-weight: 500;
+        color: red;
       }
     `;
   }
 
   constructor() {
     super();
-    this.open = false;
     this.theme = "dark";
   }
 
   render() {
     return html `
-      <div class="theme">
-        <mv-fa icon="lightbulb" style="color: ${this.open ? "yellow" : ""}" @click=${this.toggleLightBulb}></mv-fa>
-      </div>
+      <fieldset>
+        <legend>Theme</legend>
+        <label><input type="radio" name="theme" value="light" @change="${this.radioChange}" />Light</label>
+        <label><input type="radio" name="theme" value="dark" checked @change="${this.radioChange}" />Dark</label>
+      </fieldset>
       <div class="main">
         <h4>Calendar with input field</h4>
         <mv-calendar id="input" name="inputCalendar" type="input" .theme="${this.theme}" @change-date="${this.changeDate}"></mv-calendar>
@@ -69,9 +76,9 @@ export class MvCalendarDemo extends LitElement {
     `;
   }
 
-  toggleLightBulb = () => {
-    this.open = !this.open;
-    if (this.open) {
+  radioChange = originalEvent => {
+    const { target: { value } } = originalEvent;
+    if (value === "light") {
       this.theme = "light";
     } else {
       this.theme = "dark";
