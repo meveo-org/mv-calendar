@@ -21,9 +21,8 @@ export class MvCalendar extends LitElement {
   static get styles() {
     return css`
       :host {
-        font-family: "MuseoSans";
+        font-family: var(--font-family, MuseoSans);
         font-size: var(--font-size-m, 10pt);
-        font-color: var(--font-color, #3F4753);
         font-weight: 100;
         --max-width: var(--mv-calendar-select-max-width, 200px);
         --input-width: var(--mv-calendar-input-width, 100%);

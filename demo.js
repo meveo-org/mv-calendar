@@ -57,32 +57,29 @@ export class MvCalendarDemo extends LitElement {
   }
 
   render() {
+    const { theme } = this;
     return html `
       <fieldset>
         <legend>Theme</legend>
-        <label><input type="radio" name="theme" value="light" @change="${this.radioChange}" />Light</label>
-        <label><input type="radio" name="theme" value="dark" checked @change="${this.radioChange}" />Dark</label>
+        <label><input type="radio" name="theme" value="light" @change="${this.changeTheme}" />Light</label>
+        <label><input type="radio" name="theme" value="dark" checked @change="${this.changeTheme}" />Dark</label>
       </fieldset>
       <div class="main">
         <h4>Calendar with input field</h4>
-        <mv-calendar id="input" name="inputCalendar" type="input" .theme="${this.theme}" @change-date="${this.changeDate}"></mv-calendar>
+        <mv-calendar id="input" name="inputCalendar" type="input" .theme="${theme}" @change-date="${this.changeDate}"></mv-calendar>
         <h4>Calendar with button</h4>
-        <mv-calendar id="button" name="buttonCalendar" type="button" .theme="${this.theme}"></mv-calendar>
+        <mv-calendar id="button" name="buttonCalendar" type="button" .theme="${theme}"></mv-calendar>
         <h4>Single Calendar</h4>
-        <mv-calendar id="simple" name="simpleCalendar" type="simple" .theme="${this.theme}"></mv-calendar>
+        <mv-calendar id="simple" name="simpleCalendar" type="simple" .theme="${theme}"></mv-calendar>
         <h4>Calendar with date range</h4>
-        <mv-calendar id="range" name="rangeCalendar" type="range" .theme="${this.theme}"></mv-calendar>
+        <mv-calendar id="range" name="rangeCalendar" type="range" .theme="${theme}"></mv-calendar>
       </div>
     `;
   }
 
-  radioChange = originalEvent => {
+  changeTheme = originalEvent => {
     const { target: { value } } = originalEvent;
-    if (value === "light") {
-      this.theme = "light";
-    } else {
-      this.theme = "dark";
-    }
+    this.theme = value;
   };
 
   hideDropdown = event => {
