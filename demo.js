@@ -30,20 +30,21 @@ export class MvCalendarDemo extends LitElement {
         width: 50%;
       }
 
-      fieldset > label, label > input {
+      fieldset > label,
+      label > input {
         cursor: pointer;
       }
-      
+
       fieldset {
         width: 120px;
         margin-left: 10px;
-        border:2px solid red;
-        -moz-border-radius:8px;
-        -webkit-border-radius:8px;	
-        border-radius:8px;
+        border: 2px solid red;
+        -moz-border-radius: 8px;
+        -webkit-border-radius: 8px;
+        border-radius: 8px;
         color: #818181;
       }
-      
+
       legend {
         font-weight: 500;
         color: red;
@@ -58,32 +59,72 @@ export class MvCalendarDemo extends LitElement {
 
   render() {
     const { theme } = this;
-    return html `
+    return html`
       <fieldset>
         <legend>Theme</legend>
-        <label><input type="radio" name="theme" value="light" @change="${this.changeTheme}" />Light</label>
-        <label><input type="radio" name="theme" value="dark" checked @change="${this.changeTheme}" />Dark</label>
+        <label>
+          <input
+            type="radio"
+            name="theme"
+            value="light"
+            @change="${this.changeTheme}"
+          />Light
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="theme"
+            value="dark"
+            checked
+            @change="${this.changeTheme}"
+          />Dark
+        </label>
       </fieldset>
       <div class="main">
         <h4>Calendar with input field</h4>
-        <mv-calendar id="input" name="inputCalendar" type="input" .theme="${theme}" @change-date="${this.changeDate}"></mv-calendar>
+        <mv-calendar
+          id="input"
+          name="inputCalendar"
+          type="input"
+          .theme="${theme}"
+          @change-date="${this.changeDate}"
+          use-default-date
+        ></mv-calendar>
         <h4>Calendar with button</h4>
-        <mv-calendar id="button" name="buttonCalendar" type="button" .theme="${theme}"></mv-calendar>
+        <mv-calendar
+          id="button"
+          name="buttonCalendar"
+          type="button"
+          .theme="${theme}"
+          use-default-date
+        ></mv-calendar>
         <h4>Single Calendar</h4>
-        <mv-calendar id="simple" name="simpleCalendar" type="simple" .theme="${theme}"></mv-calendar>
+        <mv-calendar
+          id="simple"
+          name="simpleCalendar"
+          type="simple"
+          .theme="${theme}"
+        ></mv-calendar>
         <h4>Calendar with date range</h4>
-        <mv-calendar id="range" name="rangeCalendar" type="range" .theme="${theme}"></mv-calendar>
+        <mv-calendar
+          id="range"
+          name="rangeCalendar"
+          type="range"
+          .theme="${theme}"
+        ></mv-calendar>
       </div>
     `;
   }
 
   changeTheme = originalEvent => {
-    const { target: { value } } = originalEvent;
+    const {
+      target: { value }
+    } = originalEvent;
     this.theme = value;
   };
 
   hideDropdown = event => {
-    console.log('bone bone');
+    console.log("bone bone");
     const { target } = event;
     target.dispatchEvent(
       new CustomEvent("close-mv-dropdown", { bubbles: true })
@@ -91,7 +132,9 @@ export class MvCalendarDemo extends LitElement {
   };
 
   changeDate = event => {
-    const { detail: { startDate, endDate } } = event;
+    const {
+      detail: { startDate, endDate }
+    } = event;
   };
 }
 
