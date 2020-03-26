@@ -32,15 +32,16 @@ export class MvCalendar extends LitElement {
       },
       //  valid theme values are: "light", "dark"
       //    default: "dark"
-      theme: { type: String, attribute: true }
+      theme: { type: String, attribute: true },
+      focus: { type: Boolean, attribute: false }
     };
   }
 
   static get styles() {
     return css`
       :host {
-        font-family: var(--font-family, MuseoSans);
-        font-size: var(--font-size-m, 10pt);
+        --mv-calendar-font-family: var(--font-family, MuseoSans);
+        --font-size: var(--font-size-m, 10pt);
         font-weight: 100;
         --max-width: var(--mv-calendar-select-max-width, 200px);
         --input-width: var(--mv-calendar-input-width, 100%);
@@ -95,7 +96,11 @@ export class MvCalendar extends LitElement {
           --mv-calendar---disabled-date-range-background-color,
           #ccc
         );
-        --input-height: var(--mv-calendar-input-height, 32px);
+        --input-height: var(--mv-calendar-input-height, 44px);
+        --active-border: var(--mv-calendar-input-active-border, 1px solid #1d9bc9);
+        --active-box-shadow: var(--mv-calendar-input-active-box-shadow, inset 0 0 9px 0 rgba(29, 155, 201, 0.3));
+        --dropdown-trigger-height: var(--mv-calendar-dropdown-trigger-height, 44px);
+        --dropdown-border: var(--mv-calendar-dropdown-border, 0);
       }
 
       table {
@@ -176,7 +181,7 @@ export class MvCalendar extends LitElement {
       }
 
       .month-year-header {
-        font-size: var(--font-size-m);
+        font-size: var(--font-size);
         text-transform: uppercase;
         padding-bottom: 5px;
         text-align: center;
@@ -254,8 +259,8 @@ export class MvCalendar extends LitElement {
 
       .table td {
         vertical-align: top;
-        font-family: "MuseoSans", sans-serif;
-        font-size: var(--font-size-m);
+        font-family: var(--mv-calendar-font-family);
+        font-size: var(--font-size);
         font-weight: 100;
       }
 
@@ -274,7 +279,7 @@ export class MvCalendar extends LitElement {
         margin-top: 10px;
         margin-left: 10px;
         margin-right: 10px;
-        font-family: "MuseoSans", sans-serif;
+        font-family: var(--mv-calendar-font-family);
       }
 
       .calendar .calendar-column-item {
@@ -292,8 +297,8 @@ export class MvCalendar extends LitElement {
         width: 240px;
         height: 20px;
         border-radius: 50px;
-        font-family: "MuseoSans", sans-serif;
-        font-size: var(--font-size-m);
+        font-family: var(--mv-calendar-font-family);
+        font-size: var(--font-size);
         color: var(--single-color);
         background-color: var(--single-background-color);
         border: var(--single-color) solid 1px;
@@ -334,9 +339,9 @@ export class MvCalendar extends LitElement {
       .datepicker__input-container input {
         border: var(--input-border);
         width: 100%;
-        padding: 5px 5px;
+        padding: 5px 16px;
         border-radius: 4px;
-        font-size: 0.9rem;
+        font-size: var(--font-size);
         height: var(--input-height);
         -webkit-transition: border 0.3s;
         -o-transition: border 0.3s;
@@ -344,8 +349,22 @@ export class MvCalendar extends LitElement {
         background: transparent;
         color: #646777;
         overflow: visible;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
       }
 
+      .datepicker__input-container.focus input,
+      .datepicker__input-container input:hover {
+        border: var(--active-border);
+        box-shadow: var(--active-box-shadow);
+      }
+      
+      .calendar-button-container .datepicker__input-container input {
+        border-radius: 4px 0 0 4px;
+        border-right: none;
+      }
+      
       .datepicker__input-container input::placeholder {
         color: #999;
       }
@@ -353,8 +372,8 @@ export class MvCalendar extends LitElement {
       .datepicker__triangle {
         position: absolute;
         left: 50px;
-        font-family: "MuseoSans", sans-serif;
-        font-size: var(--font-size-m);
+        font-family: var(--mv-calendar-font-family);
+        font-size: var(--font-size);
         font-weight: 100;
         color: #000;
       }
@@ -413,8 +432,8 @@ export class MvCalendar extends LitElement {
         background: #0069ed;
         color: #ffffff;
         text-transform: none;
-        font-family: "MuseoSans", sans-serif;
-        font-size: var(--font-size-m);
+        font-family: var(--mv-calendar-font-family);
+        font-size: var(--font-size);
         cursor: pointer;
         text-align: center;
         justify-content: left;
@@ -451,6 +470,11 @@ export class MvCalendar extends LitElement {
         -ms-flex-direction: column;
         flex-direction: column;
         text-align: center;
+      }
+      
+      mv-dropdown {
+        --mv-dropdown-trigger-height: var(--dropdown-trigger-height);
+        --mv-dropdown-border: var(--dropdown-border);
       }
 
       .light {
@@ -493,6 +517,7 @@ export class MvCalendar extends LitElement {
     this.endDate = null;
     this.theme = "dark";
     this.useDefaultDate = false;
+    this.focus = false;
   }
 
   firstUpdated(changedProperties) {
@@ -811,16 +836,19 @@ export class MvCalendar extends LitElement {
   renderCalendarWithInputField = () => {
     const defaultDate = this.useDefaultDate ? this.today : "";
     const currentDate = this.value || defaultDate;
+    const focusClass = this.focus ? " focus" : "";
     return html`
       <div class="datepicker-wrapper ${this.theme}">
         <mv-dropdown container justify="left" position="bottom">
           <mv-dropdown trigger>
-            <div class="datepicker__input-container">
+            <div class="datepicker__input-container ${focusClass}">
               <input
                 id="calendarInputField"
                 type="text"
                 .value="${this.getFormattedDate(currentDate)}"
                 @focus=${this.showPopupCalendar}
+                @focusin="${this.focusInInput}"
+                @focusout="${this.focusOutInput}"
                 readonly
               />
             </div>
@@ -872,17 +900,20 @@ export class MvCalendar extends LitElement {
   renderCalendarWithButton = () => {
     const defaultDate = this.useDefaultDate ? this.today : "";
     const currentDate = this.value || defaultDate;
+    const focusClass = this.focus ? " focus" : "";
     return html`
     <div class="datepicker-wrapper ${this.theme}">
       <mv-dropdown container justify="left" position="bottom">
         <mv-dropdown trigger>
           <div class="calendar-button-container">
-            <div class="datepicker__input-container">
+            <div class="datepicker__input-container ${focusClass}">
               <input
               id="calendarInputField"
               type="text"
               .value="${this.getFormattedDate(currentDate)}"
               readonly
+              @focusin="${this.focusInInput}"
+              @focusout="${this.focusOutInput}"
               />
             </div>
             <button
@@ -1372,6 +1403,14 @@ export class MvCalendar extends LitElement {
         bubbles: true
       })
     );
+  };
+
+  focusInInput = () => {
+    this.focus = true;
+  };
+
+  focusOutInput = () => {
+    this.focus = false;
   };
 }
 

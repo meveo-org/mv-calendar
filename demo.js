@@ -17,8 +17,6 @@ export class MvCalendarDemo extends LitElement {
         --mv-calendar-input-width: 320px;
         --mv-dropdown-max-width: 450px;
         --mv-dropdown-content-max-height: 325px;
-        --mv-dropdown-trigger-height: 44px;
-        --mv-dropdown-border: 0;
       }
 
       .main {
