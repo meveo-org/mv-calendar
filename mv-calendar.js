@@ -33,7 +33,8 @@ export class MvCalendar extends LitElement {
       //  valid theme values are: "light", "dark"
       //    default: "dark"
       theme: { type: String, attribute: true },
-      focus: { type: Boolean, attribute: false }
+      focus: { type: Boolean, attribute: false },
+      placeholder: { type: String, attribute: true }
     };
   }
 
@@ -339,7 +340,7 @@ export class MvCalendar extends LitElement {
       .datepicker__input-container input {
         border: var(--input-border);
         width: 100%;
-        padding: 5px 16px;
+        padding: 5px 8px;
         border-radius: 4px;
         font-size: var(--font-size);
         height: var(--input-height);
@@ -347,11 +348,12 @@ export class MvCalendar extends LitElement {
         -o-transition: border 0.3s;
         transition: border 0.3s;
         background: transparent;
-        color: #646777;
+        color: #818181;
         overflow: visible;
         box-sizing: border-box;
         -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
+        font-family: var(--mv-calendar-font-family);
       }
 
       .datepicker__input-container.focus input,
@@ -366,7 +368,8 @@ export class MvCalendar extends LitElement {
       }
       
       .datepicker__input-container input::placeholder {
-        color: #999;
+        color: #C8C6C6;
+        font-weight: 100;
       }
 
       .datepicker__triangle {
@@ -849,6 +852,7 @@ export class MvCalendar extends LitElement {
                 @focus=${this.showPopupCalendar}
                 @focusin="${this.focusInInput}"
                 @focusout="${this.focusOutInput}"
+                placeholder="${this.placeholder || ""}"
                 readonly
               />
             </div>
@@ -911,9 +915,10 @@ export class MvCalendar extends LitElement {
               id="calendarInputField"
               type="text"
               .value="${this.getFormattedDate(currentDate)}"
-              readonly
               @focusin="${this.focusInInput}"
               @focusout="${this.focusOutInput}"
+              placeholder="${this.placeholder || ""}"
+              readonly
               />
             </div>
             <button
