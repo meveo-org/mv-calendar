@@ -8,22 +8,32 @@ export class CalendarTable extends LitElement {
     return {
       "month-shown": { type: Object, reflect: true },
       "week-days": { type: Array },
+      "selected-date": { type: Object, reflect: true },
       range: { type: Object, reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
       calendarDates: { type: Array, attribute: false },
-      currentDate: { type: String, attribute: false }
+      currentDate: { type: String, attribute: false },
     };
   }
 
   static get styles() {
     return css`
       :host {
-        font-family: var(--font-family, Arial);
+        color: var(--theme-text-color);
+        background: var(--theme-background);
+        font-family: var(--font-family);
         --font-size: var(--font-size-m, 1rem);
-        --day-hover: var(--mv-calendar-day-hover, #666);
+        --day-hover: var(--mv-calendar-day-hover, #666666);
+        --day-hover-color: var(--mv-calendar-day-hover-color, #ffffff);
+        --today-color: var(--mv-calendar-today-color, #000000);
         --today-background: var(--mv-calendar-today-background, #ededed);
         --cell-size: calc(var(--font-size) * 2);
         --shadow-offset: calc(var(--font-size) * 0.04);
+        --active-color: var(--mv-calendar-active-color, #ffffff);
+        --active-background: var(
+          --mv-calendar-active-background,
+          linear-gradient(to right, #007adf 0%, #00ecbc 180%)
+        );
       }
 
       td {
@@ -58,13 +68,19 @@ export class CalendarTable extends LitElement {
 
       .day.button.today {
         font-weight: bold;
+        color: var(--today-color);
         background-color: var(--today-background);
         text-shadow: var(--shadow-offset) var(--shadow-offset) #666;
       }
 
       .day.button:hover {
-        background-color: var(--day-hover);
-        color: rgb(255, 255, 255);
+        background: var(--day-hover);
+        color: var(--day-hover-color);
+      }
+
+      .day.button.selected {
+        background: var(--active-background);
+        color: var(--active-color);
       }
     `;
   }
@@ -81,27 +97,27 @@ export class CalendarTable extends LitElement {
         <table class="calendar-table">
           <thead>
             <tr>
-              ${this.weekDays.map(
-                day =>
-                  html`
-                    <td class="day">${day}</td>
-                  `
-              )}
+              ${this.weekDays.map((day) => html` <td class="day">${day}</td> `)}
             </tr>
           </thead>
           <tbody>
             ${this.calendarDates.map(
-              week => html`
+              (week) => html`
                 <tr>
-                  ${week.map(date => {
+                  ${week.map((date) => {
                     const buttonClass = !!date.value ? " button" : "";
+                    const timeValue = date.value && date.value.getTime();
                     const isCurrentDate =
-                      date.value &&
-                      date.value.getTime() === this.currentDate.getTime();
+                      timeValue === this.currentDate.getTime();
                     const currentDateClass = isCurrentDate ? " today" : "";
+                    const selectedTime =
+                      !!this["selected-date"] &&
+                      this["selected-date"].getTime();
+                    const isSelectedDate = timeValue === selectedTime;
+                    const selectedDateClass = isSelectedDate ? " selected" : "";
                     return html`
                       <td
-                        class="day${buttonClass}${currentDateClass}"
+                        class="day${buttonClass}${currentDateClass}${selectedDateClass}"
                         @click="${this.selectDate(date)}"
                       >
                         ${date.label}
@@ -150,7 +166,7 @@ export class CalendarTable extends LitElement {
             offset: 1,
             limit: 7 - firstDay,
             padding: firstDay,
-            prefix: true
+            prefix: true,
           })
         : [];
 
@@ -162,7 +178,7 @@ export class CalendarTable extends LitElement {
             offset: numberOfDays - lastDay,
             limit: lastDay + 1,
             padding: 6 - lastDay,
-            prefix: false
+            prefix: false,
           })
         : [];
 
@@ -175,7 +191,7 @@ export class CalendarTable extends LitElement {
       currentYear,
       currentMonth,
       offset: middleDatesStart,
-      limit: middleDatesEnd
+      limit: middleDatesEnd,
     });
 
     if (!emptyFirstWeek) {
@@ -198,27 +214,27 @@ export class CalendarTable extends LitElement {
       (this.mondayFirst ? START_ON_MONDAY : START_ON_SUNDAY);
   };
 
-  generateWeekDates = details => {
+  generateWeekDates = (details) => {
     const {
       currentYear,
       currentMonth,
       offset,
       limit,
       padding,
-      prefix
+      prefix,
     } = details;
     const weekDates = Array.from({ length: limit }, (_, date) => {
       const currentDate = date + offset;
       return {
         label: currentDate,
-        value: new Date(currentYear, currentMonth, currentDate)
+        value: new Date(currentYear, currentMonth, currentDate),
       };
     });
     if (!!padding) {
       // return 1 week padded by empty strings
       const padDates = Array.from({ length: padding }, () => ({
         label: "",
-        value: null
+        value: null,
       }));
       return prefix ? [...padDates, ...weekDates] : [...weekDates, ...padDates];
     } else {
@@ -229,14 +245,17 @@ export class CalendarTable extends LitElement {
     }
   };
 
-  selectDate = date => () => {
-    this.dispatchEvent(
-      new CustomEvent("select-date", {
-        detail: {
-          date: date.value
-        }
-      })
-    );
+  selectDate = (date) => () => {
+    if (!!date.value) {
+      this["selected-date"] = date.value;
+      this.dispatchEvent(
+        new CustomEvent("select-date", {
+          detail: {
+            date: date.value,
+          },
+        })
+      );
+    }
   };
 }
 

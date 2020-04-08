@@ -1,80 +1,108 @@
 import { LitElement, html, css } from "lit-element";
-import "mv-container";
-import "./calendar-table.js";
-import "./month-filter.js";
-import "./year-filter.js";
+import "./single-calendar.js";
+import "./dropdown-calendar.js";
 
 export class MvCalendar extends LitElement {
   static get properties() {
     return {
-      selectedDate: { type: Object, attribute: false, reflect: true }
+      "month-shown": { type: Object, attribute: false, reflect: true },
+      "selected-date": { type: Object, attribute: false, reflect: true },
+      dropdown: { type: Boolean },
+      buttonTrigger: {
+        type: Boolean,
+        attribute: "button-trigger",
+        reflect: true,
+      },
+      noClearButton: {
+        type: Boolean,
+        attribute: "no-clear-button",
+        reflect: true,
+      },
+      inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
+      mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
+      inputMask: { type: String, attribute: "input-mask", reflect: true },
+      inputMatcher: { type: String, attribute: "input-matcher", reflect: true },
+      inputRegex: { type: String, attribute: "input-regex", reflect: true },
+      minYear: { type: Number, attribute: "min-year", reflect: true },
+      maxYear: { type: Number, attribute: "max-year", reflect: true },
+      theme: { type: String },
+      justify: { type: String },
+      position: { type: String },
     };
   }
 
   static get styles() {
-    return css`
-      :host {
-        font-family: var(--font-family, Arial);
-        --font-size: var(--font-size-m, 1rem);
-        --width: var(--mv-calendar-width, 250px);
-        --mv-container-min-width: var(--width);
-        --mv-container-max-width: var(--width);
-        --mv-container-padding: 5px 10px;
-      }
-
-      .mv-calendar {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: var(--width);
-      }
-
-      .filter-container {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-      }
-
-      .filter-container * {
-        margin: 2px;
-      }
-    `;
+    return css``;
   }
 
   constructor() {
     super();
-    this.selectedDate = new Date();
+    this.theme = "light";
+    this.justify = "left";
+    this.position = "bottom";    
+    this["month-shown"] = new Date();
+    this.inlineInput = false;
+    this.mondayFirst = false;
+    this.inputMask = "mm/dd/yyyy";
+    this.inputMatcher = "mdy";
+    this.inputRegex = "\\d";
+    this.buttonTrigger = false;
+    this.dropdown=false;
+    this.noClearButton = false;
   }
 
   render() {
+    if (this.dropdown) {
+      return html`
+        <dropdown-calendar
+          .theme="${this.theme}"
+          .month-shown="${this["month-shown"]}"
+          .selected-date="${this["selected-date"]}"
+          .input-mask="${this.inputMask}"
+          .input-matcher="${this.inputMatcher}"
+          .input-regex="${this.inputRegex}"
+          .min-year="${this.minYear}"
+          .max-year="${this.maxYear}"
+          .justify="${this.justify}"
+          .position="${this.position}"
+          ?inline-input="${this.inlineInput}"
+          ?monday-first="${this.mondayFirst}"
+          ?no-clear-button="${this.noClearButton}"
+          ?button-trigger="${this.buttonTrigger}"
+          @select-date="${this.updateSelectedDate}"
+        ></dropdown-calendar>
+      `;
+    }
     return html`
-      <mv-container>
-        <div class="mv-calendar">
-          <div class="filter-container">
-            <month-filter
-              .month-shown="${this.selectedDate}"
-              @select-month="${this.updateMonth}"
-            ></month-filter>
-            <year-filter
-              .year-shown="${this.selectedDate}"
-              @select-year="${this.updateMonth}"
-            ></year-filter>
-          </div>
-          <calendar-table .month-shown="${this.selectedDate}"></calendar-table>
-        </div>
-      </mv-container>
+      <single-calendar
+        .theme="${this.theme}"
+        .month-shown="${this["month-shown"]}"
+        .selected-date="${this["selected-date"]}"
+        .input-mask="${this.inputMask}"
+        .input-matcher="${this.inputMatcher}"
+        .input-regex="${this.inputRegex}"
+        .min-year="${this.minYear}"
+        .max-year="${this.maxYear}"
+        ?inline-input="${this.inlineInput}"
+        ?monday-first="${this.mondayFirst}"
+        @select-date="${this.updateSelectedDate}"
+      ></single-calendar>
     `;
   }
 
-  updateMonth = event => {
+  updateMonth = (event) => {
     const {
-      detail: { date }
+      detail: { date },
     } = event;
-    this.updateCalendarTable(date);
+    this["month-shown"] = date;
   };
 
-  updateCalendarTable = date => {
-    this.selectedDate = date;
+  updateSelectedDate = (event) => {
+    const {
+      detail: { date },
+    } = event;
+    this["month-shown"] = date;
+    this["selected-date"] = date;
   };
 }
 

@@ -13,7 +13,7 @@ const MONTHS = [
   { label: "September", value: 8 },
   { label: "October", value: 9 },
   { label: "November", value: 10 },
-  { label: "December", value: 11 }
+  { label: "December", value: 11 },
 ];
 
 export class MonthFilter extends LitElement {
@@ -21,7 +21,7 @@ export class MonthFilter extends LitElement {
     return {
       "month-shown": { type: Object, reflect: true },
       selectedOption: { type: Object, attribute: false, reflect: true },
-      theme: {type: String}
+      theme: { type: String },
     };
   }
 
@@ -39,13 +39,14 @@ export class MonthFilter extends LitElement {
     super();
     this["month-shown"] = new Date();
     this.theme = "light";
+    this.inlineInput = "false";
   }
 
   render() {
     return html`
       <mv-select
+        placeholder="Select month"
         .value="${this.selectedOption}"
-        .placeholder="Select month"
         .options="${MONTHS}"
         .theme="${this.theme}"
         @select-option="${this.selectMonth}"
@@ -71,9 +72,9 @@ export class MonthFilter extends LitElement {
     this.selectedOption = MONTHS[currentMonth.getMonth()];
   };
 
-  selectMonth = event => {
+  selectMonth = (event) => {
     const {
-      detail: { option }
+      detail: { option },
     } = event;
     const currentDate = this["month-shown"];
     const date = new Date(currentDate.getFullYear(), option.value);

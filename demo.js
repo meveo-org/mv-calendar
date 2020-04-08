@@ -5,23 +5,23 @@ export class MvCalendarDemo extends LitElement {
   static get properties() {
     return {
       value: { type: String, attribute: true },
-      theme: { type: String, attribute: true }
+      theme: { type: String, attribute: true },
     };
   }
 
   static get styles() {
     return css`
       :host {
-        font-family: var(--font-family, "MuseoSans");
-        font-size: var(--font-size-m, 10pt);
+        font-family: var(--font-family);
+        font-size: var(--font-size-m);
         --mv-calendar-input-width: 320px;
-        --mv-dropdown-max-width: 450px;
-        --mv-dropdown-content-max-height: 325px;
       }
 
       .main {
-        width: 50%;
-        margin: 10px;
+        width: 300px;
+        margin: 10px auto;
+        display: flex;
+        flex-direction: column;
       }
 
       mv-calendar {
@@ -52,7 +52,7 @@ export class MvCalendarDemo extends LitElement {
 
   constructor() {
     super();
-    this.theme = "dark";
+    this.theme = "light";
   }
 
   render() {
@@ -65,6 +65,7 @@ export class MvCalendarDemo extends LitElement {
             type="radio"
             name="theme"
             value="light"
+            ?checked="${theme === "light"}"
             @change="${this.changeTheme}"
           />Light
         </label>
@@ -73,65 +74,67 @@ export class MvCalendarDemo extends LitElement {
             type="radio"
             name="theme"
             value="dark"
-            checked
+            ?checked="${theme === "dark"}"
             @change="${this.changeTheme}"
           />Dark
         </label>
       </fieldset>
       <div class="main">
-        <h4>Calendar with input field</h4>
-        <mv-calendar
-          id="input"
-          name="inputCalendar"
-          type="input"
-          .theme="${theme}"
-          @change-date="${this.changeDate}"
-          use-default-date
-        ></mv-calendar>
-        <h4>Calendar with button</h4>
-        <mv-calendar
-          id="button"
-          name="buttonCalendar"
-          type="button"
-          .theme="${theme}"
-          use-default-date
-        ></mv-calendar>
-        <h4>Single Calendar</h4>
-        <mv-calendar
-          id="simple"
-          name="simpleCalendar"
-          type="simple"
-          .theme="${theme}"
-        ></mv-calendar>
-        <h4>Calendar with date range</h4>
-        <mv-calendar
-          id="range"
-          name="rangeCalendar"
-          type="range"
-          .theme="${theme}"
-        ></mv-calendar>
+        <div>
+          <h4>Calendar with input field</h4>
+          <mv-calendar
+            id="input"
+            name="inputCalendar"
+            .theme="${theme}"
+            @change-date="${this.changeDate}"
+            dropdown
+          ></mv-calendar>
+        </div>
+        <div>
+          <h4>
+            Single Calendar with Monday first<br />
+            min-year=2010, max-year=2030
+          </h4>
+          <mv-calendar
+            id="simple"
+            name="simpleCalendar"
+            inline-input
+            monday-first
+            min-year="2010"
+            max-year="2030"
+            .theme="${theme}"
+          ></mv-calendar>
+        </div>
+        <div>
+          <h4>Calendar with date range</h4>
+          <mv-calendar
+            id="range"
+            name="rangeCalendar"
+            inline-input
+            .theme="${theme}"
+          ></mv-calendar>
+        </div>
       </div>
     `;
   }
 
-  changeTheme = originalEvent => {
+  changeTheme = (originalEvent) => {
     const {
-      target: { value }
+      target: { value },
     } = originalEvent;
     this.theme = value;
   };
 
-  hideDropdown = event => {
-    console.log("bone bone");
+  hideDropdown = (event) => {
     const { target } = event;
     target.dispatchEvent(
       new CustomEvent("close-mv-dropdown", { bubbles: true })
     );
   };
 
-  changeDate = event => {
+  changeDate = (event) => {
     const {
-      detail: { startDate, endDate }
+      detail: { startDate, endDate },
     } = event;
   };
 }

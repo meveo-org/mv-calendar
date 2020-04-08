@@ -5,8 +5,10 @@ export class YearFilter extends LitElement {
   static get properties() {
     return {
       "year-shown": { type: Object, reflect: true },
-      selectedYear: { type: String, reflect: true },
-      hasError: { type: Boolean, attribute: "has-error", reflect: true }
+      selectedYear: { type: Number, reflect: true },
+      hasError: { type: Boolean, attribute: "has-error", reflect: true },
+      min: { type: Number, reflect: true },
+      max: { type: Number, reflect: true },
     };
   }
 
@@ -29,7 +31,10 @@ export class YearFilter extends LitElement {
   render() {
     return html`
       <mv-spinner
-        .value="${this.selectedYear}"
+        name="year"
+        value="${this.selectedYear}"
+        .min="${this.min}"
+        .max="${this.max}"
         ?has-error="${this.hasError}"
         @spinner-change="${this.changeYear}"
       ></mv-spinner>
@@ -53,9 +58,9 @@ export class YearFilter extends LitElement {
     this.selectedYear = currentDate.getFullYear();
   };
 
-  changeYear = event => {
+  changeYear = (event) => {
     const {
-      detail: { value, invalid }
+      detail: { value, invalid },
     } = event;
     const currentDate = this["year-shown"] || new Date();
     this.hasError = invalid || !value || value < 1700; // should not be less than epoch year
