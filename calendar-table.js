@@ -247,11 +247,15 @@ export class CalendarTable extends LitElement {
 
   selectDate = (date) => () => {
     if (!!date.value) {
-      this["selected-date"] = date.value;
+      const currentValue =
+        !!this["selected-date"] && this["selected-date"].getTime();
+      const isCurrentDate = currentValue === date.value.getTime();
+      const selectedDate = isCurrentDate ? null : date.value;
+      this["selected-date"] = selectedDate;
       this.dispatchEvent(
         new CustomEvent("select-date", {
           detail: {
-            date: date.value,
+            date: selectedDate,
           },
         })
       );

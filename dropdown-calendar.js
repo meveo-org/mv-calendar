@@ -18,9 +18,13 @@ export class DropdownCalendar extends LitElement {
         reflect: true,
       },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
-      inputMask: { type: String, attribute: "input-mask", reflect: true },
-      inputMatcher: { type: String, attribute: "input-mather", reflect: true },
-      inputRegex: { type: String, attribute: "input-regex", reflect: true },
+      pattern: { type: String },
+      patternMatcher: {
+        type: String,
+        attribute: "pattern-matcher",
+        reflect: true,
+      },
+      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
       minYear: { type: Number, attribute: "min-year", reflect: true },
       maxYear: { type: Number, attribute: "max-year", reflect: true },
       inputDate: { type: String, attribute: false, reflect: true },
@@ -67,9 +71,9 @@ export class DropdownCalendar extends LitElement {
     this.position = "bottom";
     this.noBorder = false;
     this.mondayFirst = false;
-    this.inputMask = "MM/DD/YYYY";
-    this.inputMatcher = "MDY";
-    this.inputRegex = "\\d";
+    this.pattern = "MM/DD/YYYY";
+    this.patternMatcher = "MDY";
+    this.patternRegex = "\\d";
     this.noClearButton = false;
     this.buttonTrigger = false;
   }
@@ -86,11 +90,11 @@ export class DropdownCalendar extends LitElement {
         <mv-dropdown trigger>
           <mv-input
             .theme="${theme}"
-            value="${this.inputDate || ""}"
-            placeholder="${this.inputMask}"
-            pattern="${this.inputMask}"
-            pattern-matcher="${this.inputMatcher}"
-            pattern-regex="${this.inputRegex}"
+            value="${this.inputDate}"
+            placeholder="${this.pattern}"
+            pattern="${this.pattern}"
+            pattern-matcher="${this.patternMatcher}"
+            pattern-regex="${this.patternRegex}"
             ?has-error="${this.hasError}"
             @input-change="${this.updateSelectedDate}"
           >
@@ -110,20 +114,35 @@ export class DropdownCalendar extends LitElement {
         <mv-dropdown content .theme="${theme}">
           <single-calendar
             no-border
+            min-year="${this.minYear}"
+            max-year="${this.maxYear}"
             .theme="${this.theme}"
             .month-shown="${this["month-shown"]}"
             .selected-date="${this["selected-date"]}"
-            .input-mask="${this.inputMask}"
-            .input-matcher="${this.inputMatcher}"
-            .input-regex="${this.inputRegex}"
-            .min-year="${this.minYear}"
-            .max-year="${this.maxYear}"
+            .pattern="${this.pattern}"
+            .pattern-matcher="${this.patternMatcher}"
+            .pattern-regex="${this.patternRegex}"
             ?monday-first="${this.mondayFirst}"
             @select-date="${this.updateSelectedDate}"
           ></single-calendar>
         </mv-dropdown>
       </mv-dropdown>
     `;
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "selected-date") {
+      this.inputDate = !!newValue ? moment(newValue).format(this.pattern) : "";
+    }
+    super.attributeChangedCallback(name, oldValue, newValue);
+  }
+
+  firstUpdated() {
+    const selectedDate = this["selected-date"];
+    this.inputDate =
+      selectedDate !== undefined
+        ? moment(selectedDate).format(this.pattern)
+        : null;
   }
 
   updateSelectedDate = (event) => {
@@ -135,11 +154,13 @@ export class DropdownCalendar extends LitElement {
     const invalidEnteredDate = !(
       enteredDate instanceof Date && !isNaN(enteredDate)
     );
-    this.hasError = value !== "" && invalidEnteredDate && !date;
+    this.hasError =
+      value !== "" && invalidEnteredDate && date !== null && !date;
     if (!!date || !invalidEnteredDate) {
-      const formattedDate = moment(selectedDate).format(this.inputMask);
-      this.inputDate = formattedDate;
+      const formattedDate = moment(selectedDate).format(this.pattern);
+      this.inputDate = formattedDate
       this["selected-date"] = selectedDate;
+      this["month-shown"] = selectedDate;      
       this.dispatchEvent(
         new CustomEvent("select-date", {
           detail: {
@@ -148,7 +169,8 @@ export class DropdownCalendar extends LitElement {
         })
       );
     } else {
-      this.inputDate = value;
+      this["selected-date"] = null;
+      this.inputDate = value || "";
     }
   };
 

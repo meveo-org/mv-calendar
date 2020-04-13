@@ -6,6 +6,7 @@ export class MvCalendarDemo extends LitElement {
     return {
       value: { type: String, attribute: true },
       theme: { type: String, attribute: true },
+      displayDates: { type: Object, attribute: false, reflect: true },
     };
   }
 
@@ -17,15 +18,16 @@ export class MvCalendarDemo extends LitElement {
         --mv-calendar-input-width: 320px;
       }
 
-      .main {
-        width: 300px;
-        margin: 10px auto;
-        display: flex;
-        flex-direction: column;
+      pre {
+        font-size: 20px;
+        margin-left: 50px;
       }
 
-      mv-calendar {
-        width: 50%;
+      .main {
+        width: 300px;
+        margin-left: 50px;
+        display: flex;
+        flex-direction: column;
       }
 
       fieldset > label,
@@ -53,6 +55,19 @@ export class MvCalendarDemo extends LitElement {
   constructor() {
     super();
     this.theme = "light";
+    this.selectedDates = {
+      inputCalendar: new Date(2023, 7, 1),
+      singleCalendar: null,
+      rangeCalendar: { start: new Date(2023, 7, 1), end: new Date(2023, 7, 5) },
+    };
+    this.displayDates = {
+      inputCalendar: this.formatDate(this.selectedDates.inputCalendar),
+      singleCalendar: this.formatDate(this.selectedDates.singleCalendar),
+      rangeCalendar: {
+        start: this.formatDate(this.selectedDates.rangeCalendar.start),
+        end: this.formatDate(this.selectedDates.rangeCalendar.end),
+      },
+    };
   }
 
   render() {
@@ -79,15 +94,19 @@ export class MvCalendarDemo extends LitElement {
           />Dark
         </label>
       </fieldset>
+
+      <pre>${JSON.stringify(this.displayDates, null, 2)}</pre>
+
       <div class="main">
         <div>
           <h4>Calendar with input field</h4>
           <mv-calendar
-            id="input"
             name="inputCalendar"
-            .theme="${theme}"
-            @change-date="${this.changeDate}"
             dropdown
+            no-clear-button
+            .theme="${theme}"
+            .selected-date="${this.selectedDates.inputCalendar}"
+            @select-date="${this.changeDate}"
           ></mv-calendar>
         </div>
         <div>
@@ -96,22 +115,26 @@ export class MvCalendarDemo extends LitElement {
             min-year=2010, max-year=2030
           </h4>
           <mv-calendar
-            id="simple"
-            name="simpleCalendar"
+            name="singleCalendar"
             inline-input
             monday-first
             min-year="2010"
             max-year="2030"
             .theme="${theme}"
+            .selected-date="${this.selectedDates.singleCalendar}"
+            @select-date="${this.changeDate}"
           ></mv-calendar>
         </div>
         <div>
           <h4>Calendar with date range</h4>
           <mv-calendar
-            id="range"
             name="rangeCalendar"
+            range-calendar
             inline-input
             .theme="${theme}"
+            .start-date="${this.selectedDates.rangeCalendar.start}"
+            .end-date="${this.selectedDates.rangeCalendar.end}"
+            @select-date="${this.changeDate}"
           ></mv-calendar>
         </div>
       </div>
@@ -132,10 +155,24 @@ export class MvCalendarDemo extends LitElement {
     );
   };
 
+  formatDate = (date) => {
+    return !!date ? moment(date.getTime()).format("MM/DD/YYYY") : "";
+  };
+
   changeDate = (event) => {
     const {
-      detail: { startDate, endDate },
+      detail: { name, date, start, end },
     } = event;
+
+    const value =
+      name === "rangeCalendar"
+        ? { start: this.formatDate(start), end: this.formatDate(end) }
+        : this.formatDate(date);
+        
+    this.displayDates = {
+      ...this.displayDates,
+      [name]: value,
+    };
   };
 }
 

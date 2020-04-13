@@ -1,13 +1,24 @@
 import { LitElement, html, css } from "lit-element";
 import "./single-calendar.js";
 import "./dropdown-calendar.js";
+import "./range-calendar.js";
 
 export class MvCalendar extends LitElement {
   static get properties() {
     return {
-      "month-shown": { type: Object, attribute: false, reflect: true },
+      name: { type: String },
       "selected-date": { type: Object, attribute: false, reflect: true },
+      "month-shown": { type: Object, attribute: false, reflect: true },
+      "start-date": { type: Object, attribute: false, reflect: true },
+      "start-date-shown": { type: Object, attribute: false, reflect: true },
+      "end-date": { type: Object, attribute: false, reflect: true },
+      "end-date-shown": { type: Object, attribute: false, reflect: true },
       dropdown: { type: Boolean },
+      rangeCalendar: {
+        type: Boolean,
+        attribute: "range-calendar",
+        reflect: true,
+      },
       buttonTrigger: {
         type: Boolean,
         attribute: "button-trigger",
@@ -20,11 +31,15 @@ export class MvCalendar extends LitElement {
       },
       inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
-      inputMask: { type: String, attribute: "input-mask", reflect: true },
-      inputMatcher: { type: String, attribute: "input-matcher", reflect: true },
-      inputRegex: { type: String, attribute: "input-regex", reflect: true },
-      minYear: { type: Number, attribute: "min-year", reflect: true },
-      maxYear: { type: Number, attribute: "max-year", reflect: true },
+      pattern: { type: String },
+      patternMatcher: {
+        type: String,
+        attribute: "pattern-matcher",
+        reflect: true,
+      },
+      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
+      minYear: { type: Number, attribute: "min-year" },
+      maxYear: { type: Number, attribute: "max-year" },
       theme: { type: String },
       justify: { type: String },
       position: { type: String },
@@ -39,15 +54,15 @@ export class MvCalendar extends LitElement {
     super();
     this.theme = "light";
     this.justify = "left";
-    this.position = "bottom";    
-    this["month-shown"] = new Date();
+    this.position = "bottom";
     this.inlineInput = false;
     this.mondayFirst = false;
-    this.inputMask = "mm/dd/yyyy";
-    this.inputMatcher = "mdy";
-    this.inputRegex = "\\d";
+    this.pattern = "MM/DD/YYYY";
+    this.patternMatcher = "MDY";
+    this.patternRegex = "\\d";
     this.buttonTrigger = false;
-    this.dropdown=false;
+    this.dropdown = false;
+    this.rangeCalendar = false;
     this.noClearButton = false;
   }
 
@@ -55,34 +70,51 @@ export class MvCalendar extends LitElement {
     if (this.dropdown) {
       return html`
         <dropdown-calendar
+          min-year="${this.minYear}"
+          max-year="${this.maxYear}"
           .theme="${this.theme}"
           .month-shown="${this["month-shown"]}"
           .selected-date="${this["selected-date"]}"
-          .input-mask="${this.inputMask}"
-          .input-matcher="${this.inputMatcher}"
-          .input-regex="${this.inputRegex}"
-          .min-year="${this.minYear}"
-          .max-year="${this.maxYear}"
+          .pattern="${this.pattern}"
+          .pattern-matcher="${this.patternMatcher}"
+          .pattern-regex="${this.patternRegex}"
           .justify="${this.justify}"
           .position="${this.position}"
-          ?inline-input="${this.inlineInput}"
           ?monday-first="${this.mondayFirst}"
           ?no-clear-button="${this.noClearButton}"
           ?button-trigger="${this.buttonTrigger}"
           @select-date="${this.updateSelectedDate}"
         ></dropdown-calendar>
       `;
+    } else if (this.rangeCalendar) {
+      return html`
+        <range-calendar
+          min-year="${this.minYear}"
+          max-year="${this.maxYear}"
+          .theme="${this.theme}"
+          .start-date="${this["start-date"]}"
+          .start-date-shown="${this["start-date-shown"]}"
+          .end-date="${this["end-date"]}"
+          .end-date-shown="${this["start-date-shown"]}"
+          .pattern="${this.pattern}"
+          .pattern-matcher="${this.patternMatcher}"
+          .pattern-regex="${this.patternRegex}"
+          ?inline-input="${this.inlineInput}"
+          ?monday-first="${this.mondayFirst}"
+          @select-date="${this.updateSelectedDate}"
+        ></range-calendar>
+      `;
     }
     return html`
       <single-calendar
+        min-year="${this.minYear}"
+        max-year="${this.maxYear}"
         .theme="${this.theme}"
         .month-shown="${this["month-shown"]}"
         .selected-date="${this["selected-date"]}"
-        .input-mask="${this.inputMask}"
-        .input-matcher="${this.inputMatcher}"
-        .input-regex="${this.inputRegex}"
-        .min-year="${this.minYear}"
-        .max-year="${this.maxYear}"
+        .pattern="${this.pattern}"
+        .pattern-matcher="${this.patternMatcher}"
+        .pattern-regex="${this.patternRegex}"
         ?inline-input="${this.inlineInput}"
         ?monday-first="${this.mondayFirst}"
         @select-date="${this.updateSelectedDate}"
@@ -99,10 +131,20 @@ export class MvCalendar extends LitElement {
 
   updateSelectedDate = (event) => {
     const {
-      detail: { date },
+      detail: { date, start, end },
     } = event;
-    this["month-shown"] = date;
-    this["selected-date"] = date;
+    this.dispatchDateChange();
+  };
+
+  updateSelectedDate = (event) => {
+    const {
+      detail: { date, start, end },
+    } = event;
+    this.dispatchEvent(
+      new CustomEvent(`select-date`, {
+        detail: { name: this.name, date, start, end },
+      })
+    );
   };
 }
 

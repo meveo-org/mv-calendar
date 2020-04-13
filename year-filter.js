@@ -7,8 +7,8 @@ export class YearFilter extends LitElement {
       "year-shown": { type: Object, reflect: true },
       selectedYear: { type: Number, reflect: true },
       hasError: { type: Boolean, attribute: "has-error", reflect: true },
-      min: { type: Number, reflect: true },
-      max: { type: Number, reflect: true },
+      min: { type: String, reflect: true },
+      max: { type: String, reflect: true },
     };
   }
 

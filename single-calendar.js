@@ -13,9 +13,13 @@ export class SingleCalendar extends LitElement {
       noBorder: { type: Boolean, attribute: "no-border", reflect: true },
       inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
-      inputMask: { type: String, attribute: "input-mask", reflect: true },
-      inputMatcher: { type: String, attribute: "input-mather", reflect: true },
-      inputRegex: { type: String, attribute: "input-regex", reflect: true },
+      pattern: { type: String },
+      patternMatcher: {
+        type: String,
+        attribute: "pattern-matcher",
+        reflect: true,
+      },
+      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
       minYear: { type: Number, attribute: "min-year", reflect: true },
       maxYear: { type: Number, attribute: "max-year", reflect: true },
       inputDate: { type: String, attribute: false, reflect: true },
@@ -49,7 +53,8 @@ export class SingleCalendar extends LitElement {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        width: var(--width);
+        width: calc(var(--width) - 2px);
+        padding: 1px;
       }
 
       .year-month-container {
@@ -66,44 +71,29 @@ export class SingleCalendar extends LitElement {
 
   constructor() {
     super();
-    this["month-shown"] = new Date();
     this.theme = "light";
     this.noBorder = false;
     this.inlineInput = false;
     this.mondayFirst = false;
-    this.inputMask = "MM/DD/YYYY";
-    this.inputMatcher = "MDY";
-    this.inputRegex = "\\d";
+    this.pattern = "MM/DD/YYYY";
+    this.patternMatcher = "MDY";
+    this.patternRegex = "\\d";
   }
 
   render() {
     if (this.noBorder) {
       return this.renderCalendar();
     }
-    return html`<mv-container .theme="${this.theme}">${this.renderCalendar()}</mv-container>`;
+    return html`<mv-container .theme="${this.theme}">
+      ${this.renderCalendar()}
+    </mv-container>`;
   }
 
   renderCalendar = () => {
     return html`
       <div class="mv-calendar ${this.theme}">
         <slot name="header">
-          ${this.inlineInput
-            ? html`
-                <div class="inline-input">
-                  <mv-input
-                    rounded
-                    .theme="${this.theme}"
-                    .value="${this.inputDate}"
-                    placeholder="${this.inputMask}"
-                    pattern="${this.inputMask}"
-                    pattern-matcher="${this.inputMatcher}"
-                    pattern-regex="${this.inputRegex}"
-                    ?has-error="${this.hasError}"
-                    @input-change="${this.updateSelectedDate}"
-                  ></mv-input>
-                </div>
-              `
-            : html``}
+          ${this.inlineInput ? this.renderInlineInput() : html``}
         </slot>
         <div class="year-month-container">
           <month-filter
@@ -111,8 +101,8 @@ export class SingleCalendar extends LitElement {
             @select-month="${this.updateMonth}"
           ></month-filter>
           <year-filter
-            .min="${this.minYear}"
-            .max="${this.maxYear}"
+            .min="${this.minYear || undefined}"
+            .max="${this.maxYear || undefined}"
             .year-shown="${this["month-shown"]}"
             @select-year="${this.updateMonth}"
           ></year-filter>
@@ -129,11 +119,43 @@ export class SingleCalendar extends LitElement {
     `;
   };
 
+  renderInlineInput = () => {
+    const selectedDate = this["selected-date"];
+    const value = !!selectedDate
+      ? moment(selectedDate.getTime()).format(this.pattern)
+      : "";
+    return html`
+      <div class="inline-input">
+        <mv-input
+          rounded
+          .theme="${this.theme}"
+          .value="${value}"
+          placeholder="${this.pattern}"
+          pattern="${this.pattern}"
+          pattern-matcher="${this.patternMatcher}"
+          pattern-regex="${this.patternRegex}"
+          ?has-error="${this.hasError}"
+          @input-change="${this.updateSelectedDate}"
+        ></mv-input>
+      </div>
+    `;
+  };
+
+  connectedCallback() {
+    super.connectedCallback();
+    const selectedDate = this["selected-date"];
+    const hasSelectedDate = !!selectedDate;
+    const hasMonthShown = !!this["month-shown"];
+    if (!hasMonthShown) {
+      this["month-shown"] = hasSelectedDate ? selectedDate : new Date();
+    }
+  }
+
   updateMonth = (event) => {
     const {
       detail: { date },
     } = event;
-    this.updateCalendarTable(date);
+    this["month-shown"] = date;
   };
 
   updateSelectedDate = (event) => {
@@ -141,13 +163,23 @@ export class SingleCalendar extends LitElement {
       detail: { value, date },
     } = event;
     const enteredDate = new Date(value);
+
+    const invalidEnteredDate = !(
+      enteredDate instanceof Date && !isNaN(enteredDate)
+    );
+
+    this.hasError =
+      value !== "" &&
+      value !== this.pattern &&
+      invalidEnteredDate &&
+      date !== null &&
+      !date;
+
     const selectedDate = date || enteredDate;
-    const invalidEnteredDate = !(enteredDate instanceof Date && !isNaN(enteredDate))    
-    this.hasError = value !== "" && invalidEnteredDate && !date;
+
     if (!!date || !invalidEnteredDate) {
-      const formattedDate = moment(selectedDate).format(this.inputMask);
-      this.inputDate = formattedDate;
       this["selected-date"] = selectedDate;
+      this["month-shown"] = selectedDate;
       this.dispatchEvent(
         new CustomEvent("select-date", {
           detail: {
@@ -155,11 +187,16 @@ export class SingleCalendar extends LitElement {
           },
         })
       );
+    } else if (!date || !value) {
+      this["selected-date"] = null;
+      this.dispatchEvent(
+        new CustomEvent("select-date", {
+          detail: {
+            date: null,
+          },
+        })
+      );
     }
-  };
-
-  updateCalendarTable = (date) => {
-    this["month-shown"] = date;
   };
 }
 
