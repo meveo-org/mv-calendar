@@ -131,19 +131,12 @@ export class DropdownCalendar extends LitElement {
     `;
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "selected-date") {
-      this.inputDate = !!newValue ? moment(newValue).format(this.pattern) : "";
-    }
-    super.attributeChangedCallback(name, oldValue, newValue);
-  }
-
-  firstUpdated() {
+  connectedCallback() {
     const selectedDate = this["selected-date"];
-    this.inputDate =
-      selectedDate !== undefined
-        ? moment(selectedDate).format(this.pattern)
-        : null;
+    this.inputDate = !!selectedDate
+      ? moment(selectedDate).format(this.pattern)
+      : "";
+    super.connectedCallback();
   }
 
   updateSelectedDate = (event) => {
