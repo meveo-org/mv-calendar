@@ -176,7 +176,7 @@ export class DropdownCalendar extends LitElement {
   };
 
   clearSelectedDate = () => {
-    this.inputDate = null;
+    this.inputDate = "";
     this.hasError = false;
     this["selected-date"] = null;
     this.dispatchEvent(

@@ -103,7 +103,6 @@ export class MvCalendarDemo extends LitElement {
           <mv-calendar
             name="inputCalendar"
             dropdown
-            no-clear-button
             .theme="${theme}"
             .selected-date="${this.selectedDates.inputCalendar}"
             @select-date="${this.changeDate}"
