@@ -38,6 +38,8 @@ export class RangeCalendar extends LitElement {
         reflect: true,
       },
       patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
+      startPlaceholder: { type: String, attribute: "start-placeholder" },
+      endPlaceholder: { type: String, attribute: "end-placeholder" },
       minYear: { type: Number, attribute: "min-year", reflect: true },
       maxYear: { type: Number, attribute: "max-year", reflect: true },
       inputDate: { type: String, attribute: false, reflect: true },
@@ -143,6 +145,7 @@ export class RangeCalendar extends LitElement {
               no-border
               min-year="${this.minYear}"
               max-year="${this.maxYear}"
+              placeholder="${this.startPlaceholder}"
               .theme="${this.theme}"
               .selected-date="${this["start-date"]}"
               .month-shown="${this["start-date-shown"]}"
@@ -158,6 +161,7 @@ export class RangeCalendar extends LitElement {
               no-border
               min-year="${this.minYear}"
               max-year="${this.maxYear}"
+              placeholder="${this.endPlaceholder}"
               .theme="${this.theme}"
               .selected-date="${this["end-date"]}"
               .month-shown="${this["end-date-shown"]}"

@@ -31,6 +31,9 @@ export class MvCalendar extends LitElement {
       },
       inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
+      placeholder: { type: String },
+      startPlaceholder: { type: String, attribute: "start-placeholder" },
+      endPlaceholder: { type: String, attribute: "end-placeholder" },
       pattern: { type: String },
       patternMatcher: {
         type: String,
@@ -72,6 +75,7 @@ export class MvCalendar extends LitElement {
         <dropdown-calendar
           min-year="${this.minYear}"
           max-year="${this.maxYear}"
+          .placeholder="${this.placeholder}"
           .theme="${this.theme}"
           .month-shown="${this["month-shown"]}"
           .selected-date="${this["selected-date"]}"
@@ -94,8 +98,10 @@ export class MvCalendar extends LitElement {
           .theme="${this.theme}"
           .start-date="${this["start-date"]}"
           .start-date-shown="${this["start-date-shown"]}"
+          .start-placeholder="${this.startPlaceholder}"
           .end-date="${this["end-date"]}"
           .end-date-shown="${this["start-date-shown"]}"
+          .end-placeholder="${this.endPlaceholder}"
           .pattern="${this.pattern}"
           .pattern-matcher="${this.patternMatcher}"
           .pattern-regex="${this.patternRegex}"
@@ -109,6 +115,7 @@ export class MvCalendar extends LitElement {
       <single-calendar
         min-year="${this.minYear}"
         max-year="${this.maxYear}"
+        .placeholder="${this.placeholder}"
         .theme="${this.theme}"
         .month-shown="${this["month-shown"]}"
         .selected-date="${this["selected-date"]}"

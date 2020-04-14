@@ -20,6 +20,7 @@ export class SingleCalendar extends LitElement {
         reflect: true,
       },
       patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
+      placeholder: { type: String },
       minYear: { type: Number, attribute: "min-year", reflect: true },
       maxYear: { type: Number, attribute: "max-year", reflect: true },
       inputDate: { type: String, attribute: false, reflect: true },
@@ -130,7 +131,7 @@ export class SingleCalendar extends LitElement {
           rounded
           .theme="${this.theme}"
           .value="${value}"
-          placeholder="${this.pattern}"
+          placeholder="${this.placeholder || this.pattern}"
           pattern="${this.pattern}"
           pattern-matcher="${this.patternMatcher}"
           pattern-regex="${this.patternRegex}"

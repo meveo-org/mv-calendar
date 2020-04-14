@@ -116,8 +116,9 @@ export class MvCalendarDemo extends LitElement {
           </h4>
           <mv-calendar
             name="singleCalendar"
+            placeholder="Single Calendar"
             inline-input
-            monday-first
+            monday-first            
             min-year="2010"
             max-year="2030"
             .theme="${theme}"
