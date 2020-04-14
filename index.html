@@ -1,46 +1,48 @@
 <!DOCTYPE html>
 
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
-  <title>mv-calendar</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/meveo-org/mv-theme@master/css/meveo-theme.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/meveo-org/mv-theme@master/fonts/museo/museo.min.css" />
-  <link rel="icon" type="image/x-icon" href="https://front.meveo.org/images/favicon.ico">
-  <script defer src="https://cdn.jsdelivr.net/gh/meveo-org/mv-dependencies@master/es-module-shims/es-module-shims.min.js"></script>
-  <script type="importmap-shim">
+    <title>mv-calendar</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/meveo-org/mv-theme@master/css/meveo-theme.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/meveo-org/mv-theme@master/fonts/museo/museo.min.css"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://front.meveo.org/images/favicon.ico"
+    />
+    <script src="./lib/moment.min.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/gh/meveo-org/mv-dependencies@master/es-module-shims/es-module-shims.min.js"
+    ></script>
+    <script type="importmap-shim">
       {
         "imports": {
           "lit-element": "https://cdn.jsdelivr.net/gh/meveo-org/mv-dependencies@master/lit-element.js",
-          "mv-linear-icons": "https://cdn.jsdelivr.net/gh/meveo-org/mv-linear-icons@master/mv-linear-icons.js",
+          "mv-container": "https://cdn.jsdelivr.net/gh/meveo-org/mv-container@master/mv-container.js",
           "mv-click-away": "https://cdn.jsdelivr.net/gh/meveo-org/mv-click-away@master/mv-click-away.js",
-          "mv-dropdown": "https://cdn.jsdelivr.net/gh/meveo-org/mv-dropdown@master/mv-dropdown.js"
+          "mv-dropdown": "https://cdn.jsdelivr.net/gh/meveo-org/mv-dropdown@master/mv-dropdown.js",
+          "mv-input": "https://cdn.jsdelivr.net/gh/meveo-org/mv-input@master/mv-input.js",
+          "mv-spinner": "https://cdn.jsdelivr.net/gh/meveo-org/mv-spinner@master/mv-spinner.js",
+          "mv-select": "https://cdn.jsdelivr.net/gh/meveo-org/mv-select@master/mv-select.js"
         }
       }
-  </script>
-  <script type="module-shim" src="./demo.js"></script>
-  <style>
-    @font-face {
-      font-family: 'Linearicons-Free';
-      src: url('https://cdn.jsdelivr.net/gh/meveo-org/mv-linear-icons@master/fonts/Linearicons-Free.eot?w118d');
-      src: url('https://cdn.jsdelivr.net/gh/meveo-org/mv-linear-icons@master/fonts/Linearicons-Free.eot?#iefixw118d') format('embedded-opentype'),
-        url('https://cdn.jsdelivr.net/gh/meveo-org/mv-linear-icons@master/fonts/Linearicons-Free.woff2?w118d') format('woff2'),
-        url('https://cdn.jsdelivr.net/gh/meveo-org/mv-linear-icons@master/fonts/Linearicons-Free.woff?w118d') format('woff'),
-        url('https://cdn.jsdelivr.net/gh/meveo-org/mv-linear-icons@master/fonts/Linearicons-Free.ttf?w118d') format('truetype'),
-        url('https://cdn.jsdelivr.net/gh/meveo-org/mv-linear-icons@master/fonts/Linearicons-Free.svg?w118d#Linearicons-Free') format('svg');
-      font-weight: normal;
-      font-style: normal;
-    }
-  </style>
-</head>
+    </script>
+    <script type="module-shim" src="./demo.js"></script>
+  </head>
 
-<body>
-  <h1>MvCalendar Demo</h1>
-  <mv-calendar-demo></mv-calendar-demo>
-</body>
-
+  <body>
+    <h1>MvCalendar Demo</h1>
+    <mv-calendar-demo></mv-calendar-demo>
+  </body>
 </html>
