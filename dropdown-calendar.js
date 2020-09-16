@@ -5,8 +5,24 @@ import "./single-calendar.js";
 export class DropdownCalendar extends LitElement {
   static get properties() {
     return {
+      theme: { type: String },
+      justify: { type: String },
+      placeholder: { type: String },
+      position: { type: String },
+      pattern: { type: String },
       "month-shown": { type: Object, attribute: false, reflect: true },
       "selected-date": { type: Object, attribute: false, reflect: true },
+      inputDate: { type: String, attribute: false, reflect: true },
+      mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
+      minYear: { type: Number, attribute: "min-year", reflect: true },
+      maxYear: { type: Number, attribute: "max-year", reflect: true },
+      hasError: { type: Boolean, attribute: "has-error", reflect: true },
+      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
+      patternMatcher: {
+        type: String,
+        attribute: "pattern-matcher",
+        reflect: true,
+      },
       noClearButton: {
         type: Boolean,
         attribute: "no-clear-button",
@@ -17,22 +33,6 @@ export class DropdownCalendar extends LitElement {
         attribute: "button-trigger",
         reflect: true,
       },
-      mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
-      pattern: { type: String },
-      patternMatcher: {
-        type: String,
-        attribute: "pattern-matcher",
-        reflect: true,
-      },
-      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
-      placeholder: { type: String },
-      minYear: { type: Number, attribute: "min-year", reflect: true },
-      maxYear: { type: Number, attribute: "max-year", reflect: true },
-      inputDate: { type: String, attribute: false, reflect: true },
-      hasError: { type: Boolean, attribute: "has-error", reflect: true },
-      theme: { type: String },
-      justify: { type: String },
-      position: { type: String },
     };
   }
 
@@ -42,8 +42,8 @@ export class DropdownCalendar extends LitElement {
         --font-size: var(--font-size-m, 1rem);
         --width: calc(var(--font-size) * 16);
         --mv-dropdown-trigger-height: calc(var(--font-size) + 32px);
-        --mv-dropdown-min-width: calc(var(--width) + 2px);
-        --mv-dropdown-max-width: calc(var(--width) + 2px);
+        --mv-dropdown-min-width: calc(var(--width) + 4px);
+        --mv-dropdown-max-width: calc(var(--width) + 4px);
         --mv-dropdown-content-max-height: auto;
       }
 

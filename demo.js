@@ -56,9 +56,9 @@ export class MvCalendarDemo extends LitElement {
     super();
     this.theme = "light";
     this.selectedDates = {
-      inputCalendar: new Date(2023, 7, 1),
+      inputCalendar: null,
       singleCalendar: null,
-      rangeCalendar: { start: new Date(2023, 7, 1), end: new Date(2023, 7, 5) },
+      rangeCalendar: { start: null, end: null },
     };
     this.displayDates = {
       inputCalendar: this.formatDate(this.selectedDates.inputCalendar),
@@ -106,6 +106,7 @@ export class MvCalendarDemo extends LitElement {
             .theme="${theme}"
             .selected-date="${this.selectedDates.inputCalendar}"
             @select-date="${this.changeDate}"
+            @select-partial="${this.updatePartial}"
           ></mv-calendar>
         </div>
         <div>
@@ -117,12 +118,13 @@ export class MvCalendarDemo extends LitElement {
             name="singleCalendar"
             placeholder="Single Calendar"
             inline-input
-            monday-first            
+            monday-first
             min-year="2010"
             max-year="2030"
             .theme="${theme}"
             .selected-date="${this.selectedDates.singleCalendar}"
             @select-date="${this.changeDate}"
+            @select-partial="${this.updatePartial}"
           ></mv-calendar>
         </div>
         <div>
@@ -135,6 +137,7 @@ export class MvCalendarDemo extends LitElement {
             .start-date="${this.selectedDates.rangeCalendar.start}"
             .end-date="${this.selectedDates.rangeCalendar.end}"
             @select-date="${this.changeDate}"
+            @select-partial="${this.updatePartial}"
           ></mv-calendar>
         </div>
       </div>
@@ -168,11 +171,17 @@ export class MvCalendarDemo extends LitElement {
       name === "rangeCalendar"
         ? { start: this.formatDate(start), end: this.formatDate(end) }
         : this.formatDate(date);
-        
+
     this.displayDates = {
       ...this.displayDates,
       [name]: value,
     };
+  };
+
+  updatePartial = (event) => {
+    const {
+      detail: { name, date, month, year, startMonth, startYear, endMonth, endYear },
+    } = event;
   };
 }
 

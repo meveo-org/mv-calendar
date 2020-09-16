@@ -5,10 +5,27 @@ import "./single-calendar.js";
 export class RangeCalendar extends LitElement {
   static get properties() {
     return {
-      "start-date-shown": { type: Object, attribute: false, reflect: true },
+      theme: { type: String },
+      justify: { type: String },
+      position: { type: String },
+      pattern: { type: String },
+      "visible-start-month": { type: Object, attribute: false, reflect: true },
       "start-date": { type: Object, attribute: false, reflect: true },
-      "end-date-shown": { type: Object, attribute: false, reflect: true },
+      "visible-end-month": { type: Object, attribute: false, reflect: true },
       "end-date": { type: Object, attribute: false, reflect: true },
+      inputDate: { type: String, attribute: false, reflect: true },
+      mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
+      inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
+      startPlaceholder: { type: String, attribute: "start-placeholder" },
+      endPlaceholder: { type: String, attribute: "end-placeholder" },
+      minYear: { type: Number, attribute: "min-year", reflect: true },
+      maxYear: { type: Number, attribute: "max-year", reflect: true },
+      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
+      patternMatcher: {
+        type: String,
+        attribute: "pattern-matcher",
+        reflect: true,
+      },
       startDateError: {
         type: Boolean,
         attribute: "start-date-error",
@@ -29,23 +46,6 @@ export class RangeCalendar extends LitElement {
         attribute: "button-trigger",
         reflect: true,
       },
-      mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
-      inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
-      pattern: { type: String, attribute: "pattern", reflect: true },
-      patternMatcher: {
-        type: String,
-        attribute: "pattern-matcher",
-        reflect: true,
-      },
-      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
-      startPlaceholder: { type: String, attribute: "start-placeholder" },
-      endPlaceholder: { type: String, attribute: "end-placeholder" },
-      minYear: { type: Number, attribute: "min-year", reflect: true },
-      maxYear: { type: Number, attribute: "max-year", reflect: true },
-      inputDate: { type: String, attribute: false, reflect: true },
-      theme: { type: String },
-      justify: { type: String },
-      position: { type: String },
     };
   }
 
@@ -114,6 +114,8 @@ export class RangeCalendar extends LitElement {
     this.theme = "light";
     this.justify = "left";
     this.position = "bottom";
+    this.startPlaceholder = "";
+    this.endPlaceholder = "";
     this.noBorder = false;
     this.mondayFirst = false;
     this.pattern = "MM/DD/YYYY";
@@ -148,7 +150,7 @@ export class RangeCalendar extends LitElement {
               placeholder="${this.startPlaceholder}"
               .theme="${this.theme}"
               .selected-date="${this["start-date"]}"
-              .month-shown="${this["start-date-shown"]}"
+              .visible-month="${this["visible-start-month"]}"
               .pattern="${this.pattern}"
               .pattern-matcher="${this.patternMatcher}"
               .pattern-regex="${this.patternRegex}"
@@ -164,7 +166,7 @@ export class RangeCalendar extends LitElement {
               placeholder="${this.endPlaceholder}"
               .theme="${this.theme}"
               .selected-date="${this["end-date"]}"
-              .month-shown="${this["end-date-shown"]}"
+              .visible-month="${this["visible-end-month"]}"
               .pattern="${this.pattern}"
               .pattern-matcher="${this.patternMatcher}"
               .pattern-regex="${this.patternRegex}"
@@ -196,9 +198,9 @@ export class RangeCalendar extends LitElement {
       : moment(today).subtract(offset, unit).toDate();
     const end = today;
     this["start-date"] = start;
-    this["start-date-shown"] = start;
+    this["visible-start-month"] = start;
     this["end-date"] = end;
-    this["end-date-shown"] = end;
+    this["visible-end-month"] = end;
     this.dispatchDateChange();
   };
 
@@ -206,9 +208,9 @@ export class RangeCalendar extends LitElement {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     this["start-date"] = null;
-    this["start-date-shown"] = today;
+    this["visible-start-month"] = today;
     this["end-date"] = null;
-    this["end-date-shown"] = today;
+    this["visible-end-month"] = today;
     this.dispatchDateChange();
   };
 

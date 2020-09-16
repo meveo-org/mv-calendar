@@ -6,7 +6,7 @@ const START_ON_MONDAY = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export class CalendarTable extends LitElement {
   static get properties() {
     return {
-      "month-shown": { type: Object, reflect: true },
+      "visible-month": { type: Object, reflect: true },
       "week-days": { type: Array },
       "selected-date": { type: Object, reflect: true },
       range: { type: Object, reflect: true },
@@ -25,8 +25,8 @@ export class CalendarTable extends LitElement {
         --font-size: var(--font-size-m, 1rem);
         --day-hover: var(--mv-calendar-day-hover, #666666);
         --day-hover-color: var(--mv-calendar-day-hover-color, #ffffff);
-        --today-color: var(--mv-calendar-today-color, #000000);
-        --today-background: var(--mv-calendar-today-background, #ededed);
+        --today-color: var(--theme-today-color, #3d3d3d);
+        --today-background: var(--theme-today-background, #ededed);
         --cell-size: calc(var(--font-size) * 2);
         --shadow-offset: calc(var(--font-size) * 0.04);
         --active-color: var(--mv-calendar-active-color, #ffffff);
@@ -46,7 +46,10 @@ export class CalendarTable extends LitElement {
       .month-container {
         display: flex;
         justify-content: center;
-        width: 100%;
+      }
+
+      .calendar-table {
+        margin: 0 0 5px 5px;
       }
 
       .day {
@@ -70,7 +73,6 @@ export class CalendarTable extends LitElement {
         font-weight: bold;
         color: var(--today-color);
         background-color: var(--today-background);
-        text-shadow: var(--shadow-offset) var(--shadow-offset) #666;
       }
 
       .day.button:hover {
@@ -88,7 +90,7 @@ export class CalendarTable extends LitElement {
   constructor() {
     super();
     this.mondayFirst = false;
-    this["month-shown"] = new Date();
+    this["visible-month"] = new Date();
   }
 
   render() {
@@ -134,14 +136,14 @@ export class CalendarTable extends LitElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "month-shown") {
+    if (name === "visible-month") {
       this.initializeCalendarTable();
     }
     super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   initializeCalendarTable = () => {
-    const currentDate = this["month-shown"] || new Date();
+    const currentDate = this["visible-month"] || new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
     const nextMonth = currentDate.getMonth() + 1;

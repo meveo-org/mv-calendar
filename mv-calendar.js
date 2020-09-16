@@ -7,13 +7,30 @@ export class MvCalendar extends LitElement {
   static get properties() {
     return {
       name: { type: String },
-      "selected-date": { type: Object, attribute: false, reflect: true },
-      "month-shown": { type: Object, attribute: false, reflect: true },
-      "start-date": { type: Object, attribute: false, reflect: true },
-      "start-date-shown": { type: Object, attribute: false, reflect: true },
-      "end-date": { type: Object, attribute: false, reflect: true },
-      "end-date-shown": { type: Object, attribute: false, reflect: true },
       dropdown: { type: Boolean },
+      theme: { type: String },
+      justify: { type: String },
+      position: { type: String },
+      placeholder: { type: String },
+      pattern: { type: String },
+      "selected-date": { type: Object, attribute: false, reflect: true },
+      "visible-month": { type: Object, attribute: false, reflect: true },
+      "start-date": { type: Object, attribute: false, reflect: true },
+      "visible-start-month": { type: Object, attribute: false, reflect: true },
+      "end-date": { type: Object, attribute: false, reflect: true },
+      "visible-end-month": { type: Object, attribute: false, reflect: true },
+      inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
+      mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
+      startPlaceholder: { type: String, attribute: "start-placeholder" },
+      endPlaceholder: { type: String, attribute: "end-placeholder" },
+      minYear: { type: Number, attribute: "min-year" },
+      maxYear: { type: Number, attribute: "max-year" },
+      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
+      patternMatcher: {
+        type: String,
+        attribute: "pattern-matcher",
+        reflect: true,
+      },
       rangeCalendar: {
         type: Boolean,
         attribute: "range-calendar",
@@ -29,23 +46,6 @@ export class MvCalendar extends LitElement {
         attribute: "no-clear-button",
         reflect: true,
       },
-      inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
-      mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
-      placeholder: { type: String },
-      startPlaceholder: { type: String, attribute: "start-placeholder" },
-      endPlaceholder: { type: String, attribute: "end-placeholder" },
-      pattern: { type: String },
-      patternMatcher: {
-        type: String,
-        attribute: "pattern-matcher",
-        reflect: true,
-      },
-      patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
-      minYear: { type: Number, attribute: "min-year" },
-      maxYear: { type: Number, attribute: "max-year" },
-      theme: { type: String },
-      justify: { type: String },
-      position: { type: String },
     };
   }
 
@@ -77,7 +77,7 @@ export class MvCalendar extends LitElement {
           max-year="${this.maxYear}"
           .placeholder="${this.placeholder}"
           .theme="${this.theme}"
-          .month-shown="${this["month-shown"]}"
+          .visible-month="${this["visible-month"]}"
           .selected-date="${this["selected-date"]}"
           .pattern="${this.pattern}"
           .pattern-matcher="${this.patternMatcher}"
@@ -97,10 +97,10 @@ export class MvCalendar extends LitElement {
           max-year="${this.maxYear}"
           .theme="${this.theme}"
           .start-date="${this["start-date"]}"
-          .start-date-shown="${this["start-date-shown"]}"
+          .visible-start-month="${this["visible-start-month"]}"
           .start-placeholder="${this.startPlaceholder}"
           .end-date="${this["end-date"]}"
-          .end-date-shown="${this["start-date-shown"]}"
+          .visible-end-month="${this["visible-end-month"]}"
           .end-placeholder="${this.endPlaceholder}"
           .pattern="${this.pattern}"
           .pattern-matcher="${this.patternMatcher}"
@@ -108,6 +108,10 @@ export class MvCalendar extends LitElement {
           ?inline-input="${this.inlineInput}"
           ?monday-first="${this.mondayFirst}"
           @select-date="${this.updateSelectedDate}"
+          @select-start-month="${this.updateSelectedMonth("start")}"
+          @select-start-year="${this.updateSelectedYear("start")}"
+          @select-end-month="${this.updateSelectedMonth("end")}"
+          @select-end-year="${this.updateSelectedYear("end")}"
         ></range-calendar>
       `;
     }
@@ -117,7 +121,7 @@ export class MvCalendar extends LitElement {
         max-year="${this.maxYear}"
         .placeholder="${this.placeholder}"
         .theme="${this.theme}"
-        .month-shown="${this["month-shown"]}"
+        .visible-month="${this["visible-month"]}"
         .selected-date="${this["selected-date"]}"
         .pattern="${this.pattern}"
         .pattern-matcher="${this.patternMatcher}"
@@ -125,31 +129,54 @@ export class MvCalendar extends LitElement {
         ?inline-input="${this.inlineInput}"
         ?monday-first="${this.mondayFirst}"
         @select-date="${this.updateSelectedDate}"
+        @select-month="${this.updateSelectedMonth()}"
+        @select-year="${this.updateSelectedYear()}"
       ></single-calendar>
     `;
   }
 
-  updateMonth = (event) => {
-    const {
-      detail: { date },
-    } = event;
-    this["month-shown"] = date;
-  };
-
   updateSelectedDate = (event) => {
-    const {
-      detail: { date, start, end },
-    } = event;
-    this.dispatchDateChange();
-  };
-
-  updateSelectedDate = (event) => {
+    const { name } = this;
     const {
       detail: { date, start, end },
     } = event;
     this.dispatchEvent(
       new CustomEvent(`select-date`, {
-        detail: { name: this.name, date, start, end },
+        detail: { name, date, start, end },
+      })
+    );
+  };
+
+  updateSelectedMonth = (range) => (event) => {
+    const selectedDate = this["selected-date"];
+    const {
+      detail: { date, month },
+    } = event;
+    const newDate = selectedDate || date;
+    newDate.setMonth(month);
+    const name = `visible${!!range ? `-${range}` : ""}-month`;
+    const monthName = !!range ? `${range}Month` : "month";
+    this[name] = newDate;
+    this.dispatchEvent(
+      new CustomEvent(`select-partial`, {
+        detail: { name, date: newDate, [monthName]: month },
+      })
+    );
+  };
+
+  updateSelectedYear = (range) => (event) => {
+    const selectedDate = this["selected-date"];
+    const {
+      detail: { date, year },
+    } = event;
+    const newDate = selectedDate || date;
+    newDate.setFullYear(year);
+    const name = `visible${!!range ? `-${range}` : ""}-month`;
+    const yearName = !!range ? `${range}Year` : "year";
+    this[name] = newDate;
+    this.dispatchEvent(
+      new CustomEvent(`select-partial`, {
+        detail: { name, date: newDate, [yearName]: year },
       })
     );
   };
