@@ -81,23 +81,23 @@ export class MonthTable extends LitElement {
 
       td {
         padding: 0;
-        margin: 0;        
+        margin: 0;
       }
 
-      .month-container {        
+      .month-container {
         max-width: calc(100% - 4px);
       }
 
       .month-table {
         border-spacing: 3px;
         border-collapse: separate;
-        margin: 0 0 4px 3px;     
+        margin: 0 0 4px 3px;
       }
 
       button.now {
         font-weight: bold;
         color: var(--today-color);
-        background-color: var(--today-background);        
+        background-color: var(--today-background);
       }
 
       button.selected {
@@ -110,16 +110,12 @@ export class MonthTable extends LitElement {
   constructor() {
     super();
     this["visible-month"] = new Date();
-    this.month = (new Date()).getMonth();
+    this.month = new Date().getMonth();
   }
 
   render() {
     const selectedMonth =
       !!this["selected-date"] && this["selected-date"].getMonth();
-    const hasSelectedMonth = !!selectedMonth || selectedMonth === 0;
-    const currentMonth = hasSelectedMonth
-      ? selectedMonth
-      : this["visible-month"].getMonth();
     return html`
       <div class="month-container">
         <table class="month-table">
@@ -129,7 +125,7 @@ export class MonthTable extends LitElement {
                 <tr>
                   ${monthRow.map((month, monthIndex) => {
                     const value = rowIndex * MONTHS_PER_ROW + monthIndex;
-                    const selected = value === currentMonth ? "selected" : "";
+                    const selected = value === selectedMonth ? "selected" : "";
                     const now = value === this.month ? " now" : "";
                     return html`<td>
                       <button

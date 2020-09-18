@@ -137,14 +137,14 @@ export class YearTable extends LitElement {
               return html`
                 <tr>
                   ${yearRow.map((year) => {
-                    const selected = year === currentYear ? "selected" : "";
+                    const selected = year === selectedYear ? "selected" : "";
                     const now = year === this.year ? " now" : "";
                     const hasMinYear = this.minYear !== undefined;
                     const hasMaxYear = this.maxYear !== undefined;
                     const invalidMinYear = hasMinYear && year < this.minYear;
                     const invalidMaxYear = hasMaxYear && year > this.maxYear;
                     const disabled =
-                      invalidMinYear || invalidMaxYear ? " disabled" : "";
+                      invalidMinYear || invalidMaxYear ? "disabled" : "";
                     return html`
                       <td>
                         <button
