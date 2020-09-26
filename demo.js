@@ -1,4 +1,5 @@
 import { LitElement, html, css } from "lit-element";
+import { EMPTY_DATE } from "./utils/index.js";
 import "./mv-calendar.js";
 
 export class MvCalendarDemo extends LitElement {
@@ -56,9 +57,9 @@ export class MvCalendarDemo extends LitElement {
     super();
     this.theme = "light";
     this.selectedDates = {
-      inputCalendar: null,
-      singleCalendar: null,
-      rangeCalendar: { start: null, end: null },
+      inputCalendar: { ...EMPTY_DATE },
+      singleCalendar: { ...EMPTY_DATE },
+      rangeCalendar: { start: { ...EMPTY_DATE }, end: { ...EMPTY_DATE } },
     };
     this.displayDates = {
       inputCalendar: this.formatDate(this.selectedDates.inputCalendar),
@@ -103,6 +104,7 @@ export class MvCalendarDemo extends LitElement {
           <mv-calendar
             name="inputCalendar"
             dropdown
+            allow-partial
             .theme="${theme}"
             .selected-date="${this.selectedDates.inputCalendar}"
             @select-date="${this.changeDate}"
@@ -117,12 +119,13 @@ export class MvCalendarDemo extends LitElement {
           <mv-calendar
             name="singleCalendar"
             placeholder="Single Calendar"
+            allow-partial
             inline-input
             monday-first
             min-year="2010"
             max-year="2030"
             .theme="${theme}"
-            .selected-date="${this.selectedDates.singleCalendar}"
+            .selected="${this.selectedDates.singleCalendar}"
             @select-date="${this.changeDate}"
             @select-partial="${this.updatePartial}"
           ></mv-calendar>
@@ -132,6 +135,7 @@ export class MvCalendarDemo extends LitElement {
           <mv-calendar
             name="rangeCalendar"
             range-calendar
+            allow-partial
             inline-input
             .theme="${theme}"
             .start-date="${this.selectedDates.rangeCalendar.start}"
@@ -158,7 +162,8 @@ export class MvCalendarDemo extends LitElement {
     );
   };
 
-  formatDate = (date) => {
+  formatDate = (value) => {
+    const { date } = value;
     return !!date ? moment(date.getTime()).format("MM/DD/YYYY") : "";
   };
 
@@ -180,8 +185,22 @@ export class MvCalendarDemo extends LitElement {
 
   updatePartial = (event) => {
     const {
-      detail: { name, date, month, year, startMonth, startYear, endMonth, endYear },
+      detail: {
+        name,
+        date,
+        day,
+        month,
+        year,
+        startMonth,
+        startYear,
+        endMonth,
+        endYear,
+      },
     } = event;
+
+    console.log("day: ", day);
+    console.log("month: ", month);
+    console.log("year: ", year);
   };
 }
 

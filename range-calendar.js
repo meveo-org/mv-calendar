@@ -26,6 +26,11 @@ export class RangeCalendar extends LitElement {
         attribute: "pattern-matcher",
         reflect: true,
       },
+      allowPartial: {
+        type: Boolean,
+        attribute: "allow-partial",
+        reflect: true,
+      },
       startDateError: {
         type: Boolean,
         attribute: "start-date-error",
@@ -118,6 +123,7 @@ export class RangeCalendar extends LitElement {
     this.endPlaceholder = "";
     this.noBorder = false;
     this.mondayFirst = false;
+    this.allowPartial = false;
     this.pattern = "MM/DD/YYYY";
     this.patternMatcher = "MDY";
     this.patternRegex = "\\d";
@@ -157,6 +163,7 @@ export class RangeCalendar extends LitElement {
               ?inline-input="${this.inlineInput}"
               ?monday-first="${this.mondayFirst}"
               ?has-error="${this.startDateError}"
+              ?allow-partial="${this.allowPartial}"
               @select-date="${this.updateSelectedDate("start-date")}"
             ></single-calendar>
             <single-calendar
@@ -173,6 +180,7 @@ export class RangeCalendar extends LitElement {
               ?inline-input="${this.inlineInput}"
               ?monday-first="${this.mondayFirst}"
               ?has-error="${this.endDateError}"
+              ?allow-partial="${this.allowPartial}"
               @select-date="${this.updateSelectedDate("end-date")}"
             ></single-calendar>
           </div>

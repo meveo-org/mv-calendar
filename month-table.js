@@ -1,4 +1,5 @@
 import { LitElement, html, css } from "lit-element";
+import { EMPTY_DATE, NOW } from "./utils/index.js";
 
 export const MONTHS = [
   "January",
@@ -29,8 +30,8 @@ const MONTH_TABLE_VALUES = (() => {
 export class MonthTable extends LitElement {
   static get properties() {
     return {
-      "visible-month": { type: Object, attribute: false, reflect: true },
-      "selected-date": { type: Object, attribute: false, reflect: true },
+      visible: { type: Object, attribute: false, reflect: true },
+      selected: { type: Object, attribute: false, reflect: true },
     };
   }
 
@@ -109,13 +110,12 @@ export class MonthTable extends LitElement {
 
   constructor() {
     super();
-    this["visible-month"] = new Date();
-    this.month = new Date().getMonth();
+    this.selected = { ...EMPTY_DATE };
+    this.visible = { ...NOW };
   }
 
   render() {
-    const selectedMonth =
-      !!this["selected-date"] && this["selected-date"].getMonth();
+    const selectedMonth = this.selected.month;
     return html`
       <div class="month-container">
         <table class="month-table">
@@ -126,7 +126,7 @@ export class MonthTable extends LitElement {
                   ${monthRow.map((month, monthIndex) => {
                     const value = rowIndex * MONTHS_PER_ROW + monthIndex;
                     const selected = value === selectedMonth ? "selected" : "";
-                    const now = value === this.month ? " now" : "";
+                    const now = value === NOW.month ? " now" : "";
                     return html`<td>
                       <button
                         class="${selected}${now}"
@@ -146,13 +146,7 @@ export class MonthTable extends LitElement {
   }
 
   selectMonth = (month) => () => {
-    const selectedDate = this["selected-date"];
-    const hasSelectedDate = !!selectedDate;
-    const currentDate = hasSelectedDate ? selectedDate : this["visible-month"];
-    currentDate.setMonth(month);
-    this.dispatchEvent(
-      new CustomEvent("select-month", { detail: { date: currentDate, month } })
-    );
+    this.dispatchEvent(new CustomEvent("select-month", { detail: { month } }));
   };
 }
 

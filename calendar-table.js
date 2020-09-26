@@ -1,15 +1,30 @@
 import { LitElement, html, css } from "lit-element";
+import {
+  NOW,
+  EMPTY_DATE,
+  START_ON_MONDAY,
+  START_ON_SUNDAY,
+  isEmpty,
+  isEqual,
+  initializeDate,
+  generateWeekDates,
+} from "./utils/index.js";
 
-const START_ON_SUNDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const START_ON_MONDAY = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const buildCellClass = (date, selected) => {
+  const buttonClass = !isEmpty(date) ? " button" : "";
+  const currentClass = isEqual(date, NOW) ? " today" : "";
+  const isSelectedDate = isEqual(date, selected);
+  const selectedDateClass = isSelectedDate ? " selected" : "";
+  return `day${buttonClass}${currentClass}${selectedDateClass}`;
+};
 
 export class CalendarTable extends LitElement {
   static get properties() {
     return {
-      "visible-month": { type: Object, reflect: true },
-      "week-days": { type: Array },
-      "selected-date": { type: Object, reflect: true },
+      visible: { type: Object, reflect: true },
+      selected: { type: Object, reflect: true },
       range: { type: Object, reflect: true },
+      weekDays: { type: Array, attribute: "week-days", reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
       calendarDates: { type: Array, attribute: false },
       currentDate: { type: String, attribute: false },
@@ -90,7 +105,8 @@ export class CalendarTable extends LitElement {
   constructor() {
     super();
     this.mondayFirst = false;
-    this["visible-month"] = new Date();
+    this.selected = { ...EMPTY_DATE };
+    this.visible = { ...NOW };
   }
 
   render() {
@@ -99,7 +115,7 @@ export class CalendarTable extends LitElement {
         <table class="calendar-table">
           <thead>
             <tr>
-              ${this.weekDays.map((day) => html` <td class="day">${day}</td> `)}
+              ${this.weekDays.map((day) => html`<td class="day">${day}</td>`)}
             </tr>
           </thead>
           <tbody>
@@ -107,22 +123,13 @@ export class CalendarTable extends LitElement {
               (week) => html`
                 <tr>
                   ${week.map((date) => {
-                    const buttonClass = !!date.value ? " button" : "";
-                    const timeValue = date.value && date.value.getTime();
-                    const isCurrentDate =
-                      timeValue === this.currentDate.getTime();
-                    const currentDateClass = isCurrentDate ? " today" : "";
-                    const selectedTime =
-                      !!this["selected-date"] &&
-                      this["selected-date"].getTime();
-                    const isSelectedDate = timeValue === selectedTime;
-                    const selectedDateClass = isSelectedDate ? " selected" : "";
+                    const cellClass = buildCellClass(date, this.selected);
                     return html`
                       <td
-                        class="day${buttonClass}${currentDateClass}${selectedDateClass}"
+                        class="${cellClass}"
                         @click="${this.selectDate(date)}"
                       >
-                        ${date.label}
+                        ${date.day}
                       </td>
                     `;
                   })}
@@ -136,24 +143,23 @@ export class CalendarTable extends LitElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "visible-month") {
+    if (name === "visible") {
       this.initializeCalendarTable();
     }
     super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   initializeCalendarTable = () => {
-    const currentDate = this["visible-month"] || new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-    const nextMonth = currentDate.getMonth() + 1;
-    const numberOfDays = new Date(currentYear, nextMonth, 0).getDate();
+    this.visible = isEmpty(this.visible) ? { ...NOW } : this.visible;
+    const year = this.visible.year;
+    const month = this.visible.month;
+    const nextMonth = this.visible.month + 1;
+    const numberOfDays = new Date(year, nextMonth, 0).getDate();
 
     const dayOffset = this.mondayFirst ? -1 : 0;
-    const startingDayOfWeek =
-      new Date(currentYear, currentMonth, 1).getDay() + dayOffset;
+    const startingDayOfWeek = new Date(year, month, 1).getDay() + dayOffset;
     const endingDayOfWeek =
-      new Date(currentYear, currentMonth, numberOfDays).getDay() + dayOffset;
+      new Date(year, month, numberOfDays).getDay() + dayOffset;
 
     const firstDay = startingDayOfWeek < 0 ? 6 : startingDayOfWeek;
     const lastDay = endingDayOfWeek < 0 ? 6 : endingDayOfWeek;
@@ -162,9 +168,9 @@ export class CalendarTable extends LitElement {
 
     const firstWeek =
       firstDay > 0
-        ? this.generateWeekDates({
-            currentYear,
-            currentMonth,
+        ? generateWeekDates({
+            year,
+            month,
             offset: 1,
             limit: 7 - firstDay,
             padding: firstDay,
@@ -174,9 +180,9 @@ export class CalendarTable extends LitElement {
 
     const lastWeek =
       lastDay < 6
-        ? this.generateWeekDates({
-            currentYear,
-            currentMonth,
+        ? generateWeekDates({
+            year,
+            month,
             offset: numberOfDays - lastDay,
             limit: lastDay + 1,
             padding: 6 - lastDay,
@@ -189,9 +195,9 @@ export class CalendarTable extends LitElement {
     const lastWeekCount = emptyLastWeek ? 0 : lastDay + 1;
     const middleDatesStart = emptyFirstWeek ? 1 : 8 - firstDay;
     const middleDatesEnd = numberOfDays - middleDatesStart - lastWeekCount + 1;
-    const middleDates = this.generateWeekDates({
-      currentYear,
-      currentMonth,
+    const middleDates = generateWeekDates({
+      year,
+      month,
       offset: middleDatesStart,
       limit: middleDatesEnd,
     });
@@ -204,63 +210,17 @@ export class CalendarTable extends LitElement {
       this.calendarDates.push(lastWeek);
     }
 
-    const now = new Date();
-    this.currentDate = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
-
     this.weekDays =
-      this["week-days"] ||
-      (this.mondayFirst ? START_ON_MONDAY : START_ON_SUNDAY);
-  };
-
-  generateWeekDates = (details) => {
-    const {
-      currentYear,
-      currentMonth,
-      offset,
-      limit,
-      padding,
-      prefix,
-    } = details;
-    const weekDates = Array.from({ length: limit }, (_, date) => {
-      const currentDate = date + offset;
-      return {
-        label: currentDate,
-        value: new Date(currentYear, currentMonth, currentDate),
-      };
-    });
-    if (!!padding) {
-      // return 1 week padded by empty strings
-      const padDates = Array.from({ length: padding }, () => ({
-        label: "",
-        value: null,
-      }));
-      return prefix ? [...padDates, ...weekDates] : [...weekDates, ...padDates];
-    } else {
-      // group by week
-      return Array.from({ length: weekDates.length / 7 }, (_, week) =>
-        weekDates.slice(week * 7, week * 7 + 7)
-      );
-    }
+      this.weekDays || (this.mondayFirst ? START_ON_MONDAY : START_ON_SUNDAY);
   };
 
   selectDate = (date) => () => {
-    if (!!date.value) {
-      const currentValue =
-        !!this["selected-date"] && this["selected-date"].getTime();
-      const isCurrentDate = currentValue === date.value.getTime();
-      const selectedDate = isCurrentDate ? null : date.value;
-      this["selected-date"] = selectedDate;
+    if (!isEmpty(date)) {
+      const isCurrentDate = isEqual(date, this.selected);
+      const chosenDate = isCurrentDate ? {...EMPTY_DATE} : date;
       this.dispatchEvent(
-        new CustomEvent("select-date", {
-          detail: {
-            date: selectedDate,
-          },
-        })
-      );
+        new CustomEvent("select-date", { detail: { ...chosenDate } })
+      );      
     }
   };
 }

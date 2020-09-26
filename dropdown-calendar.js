@@ -23,14 +23,14 @@ export class DropdownCalendar extends LitElement {
         attribute: "pattern-matcher",
         reflect: true,
       },
+      allowPartial: {
+        type: Boolean,
+        attribute: "allow-partial",
+        reflect: true,
+      },
       noClearButton: {
         type: Boolean,
         attribute: "no-clear-button",
-        reflect: true,
-      },
-      buttonTrigger: {
-        type: Boolean,
-        attribute: "button-trigger",
         reflect: true,
       },
     };
@@ -58,6 +58,10 @@ export class DropdownCalendar extends LitElement {
         cursor: pointer;
       }
 
+      mv-dropdown[content] {
+        --mv-container-margin: 0;
+      }
+
       .clear-button {
         font-size: var(--font-size-m);
       }
@@ -72,15 +76,17 @@ export class DropdownCalendar extends LitElement {
     this.position = "bottom";
     this.noBorder = false;
     this.mondayFirst = false;
+    this.allowPartial = false;
     this.pattern = "MM/DD/YYYY";
     this.patternMatcher = "MDY";
     this.patternRegex = "\\d";
     this.noClearButton = false;
-    this.buttonTrigger = false;
   }
 
   render() {
     const { theme } = this;
+    const pattern = this.allowPartial ? "YYYY/MM/DD" : this.pattern;
+    const placeholder = this.placeholder || pattern;
     return html`
       <mv-dropdown
         container
@@ -92,10 +98,10 @@ export class DropdownCalendar extends LitElement {
           <mv-input
             .theme="${theme}"
             value="${this.inputDate}"
-            placeholder="${this.placeholder || this.pattern}"
-            pattern="${this.pattern}"
-            pattern-matcher="${this.patternMatcher}"
-            pattern-regex="${this.patternRegex}"
+            placeholder="${placeholder}"
+            pattern="${pattern}"
+            pattern-matcher="${this.allowPartial ? "MDY" : this.patternMatcher}"
+            pattern-regex="${this.allowPartial ? "\\d" : this.patternRegex}"
             ?has-error="${this.hasError}"
             @input-change="${this.updateSelectedDate}"
           >
@@ -124,6 +130,7 @@ export class DropdownCalendar extends LitElement {
             .pattern-matcher="${this.patternMatcher}"
             .pattern-regex="${this.patternRegex}"
             ?monday-first="${this.mondayFirst}"
+            ?allow-partial="${this.allowPartial}"
             @select-date="${this.updateSelectedDate}"
           ></single-calendar>
         </mv-dropdown>
@@ -143,6 +150,8 @@ export class DropdownCalendar extends LitElement {
     const {
       detail: { value, date },
     } = event;
+    console.log("value: ", value);
+    console.log("date: ", date);
     const enteredDate = new Date(value);
     const selectedDate = date || enteredDate;
     const invalidEnteredDate = !(

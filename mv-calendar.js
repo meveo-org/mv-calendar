@@ -2,43 +2,41 @@ import { LitElement, html, css } from "lit-element";
 import "./single-calendar.js";
 import "./dropdown-calendar.js";
 import "./range-calendar.js";
-
+import { EMPTY_DATE, NOW } from "./utils/index.js";
 export class MvCalendar extends LitElement {
   static get properties() {
     return {
       name: { type: String },
-      dropdown: { type: Boolean },
+      placeholder: { type: String },
       theme: { type: String },
       justify: { type: String },
       position: { type: String },
-      placeholder: { type: String },
-      pattern: { type: String },
-      "selected-date": { type: Object, attribute: false, reflect: true },
-      "visible-month": { type: Object, attribute: false, reflect: true },
-      "start-date": { type: Object, attribute: false, reflect: true },
-      "visible-start-month": { type: Object, attribute: false, reflect: true },
-      "end-date": { type: Object, attribute: false, reflect: true },
-      "visible-end-month": { type: Object, attribute: false, reflect: true },
+      dropdown: { type: Boolean },
+      selected: { type: Object, attribute: false, reflect: true },
+      visible: { type: Object, attribute: false, reflect: true },
+      "selected-range": { type: Object, attribute: false, reflect: true },
+      "visible-range": { type: Object, attribute: false, reflect: true },
       inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
       startPlaceholder: { type: String, attribute: "start-placeholder" },
       endPlaceholder: { type: String, attribute: "end-placeholder" },
       minYear: { type: Number, attribute: "min-year" },
       maxYear: { type: Number, attribute: "max-year" },
+      pattern: { type: String },
       patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
       patternMatcher: {
         type: String,
         attribute: "pattern-matcher",
         reflect: true,
       },
+      allowPartial: {
+        type: Boolean,
+        attribute: "allow-partial",
+        reflect: true,
+      },
       rangeCalendar: {
         type: Boolean,
         attribute: "range-calendar",
-        reflect: true,
-      },
-      buttonTrigger: {
-        type: Boolean,
-        attribute: "button-trigger",
         reflect: true,
       },
       noClearButton: {
@@ -58,15 +56,25 @@ export class MvCalendar extends LitElement {
     this.theme = "light";
     this.justify = "left";
     this.position = "bottom";
-    this.inlineInput = false;
-    this.mondayFirst = false;
     this.pattern = "MM/DD/YYYY";
     this.patternMatcher = "MDY";
     this.patternRegex = "\\d";
-    this.buttonTrigger = false;
+    this.inlineInput = false;
+    this.mondayFirst = false;
+    this.allowPartial = false;
     this.dropdown = false;
     this.rangeCalendar = false;
     this.noClearButton = false;
+    this.selected = { ...EMPTY_DATE };
+    this.visible = { ...NOW };
+    this.selectedRange = {
+      start: { ...EMPTY_DATE },
+      end: { ...EMPTY_DATE },
+    };
+    this.visibleRange = {
+      start: { ...NOW },
+      end: { ...NOW },
+    };
   }
 
   render() {
@@ -77,16 +85,16 @@ export class MvCalendar extends LitElement {
           max-year="${this.maxYear}"
           .placeholder="${this.placeholder}"
           .theme="${this.theme}"
-          .visible-month="${this["visible-month"]}"
-          .selected-date="${this["selected-date"]}"
+          .visible="${this.visible}"
+          .selected="${this.selected}"
           .pattern="${this.pattern}"
           .pattern-matcher="${this.patternMatcher}"
           .pattern-regex="${this.patternRegex}"
           .justify="${this.justify}"
           .position="${this.position}"
           ?monday-first="${this.mondayFirst}"
+          ?allow-partial="${this.allowPartial}"
           ?no-clear-button="${this.noClearButton}"
-          ?button-trigger="${this.buttonTrigger}"
           @select-date="${this.updateSelectedDate}"
         ></dropdown-calendar>
       `;
@@ -107,6 +115,7 @@ export class MvCalendar extends LitElement {
           .pattern-regex="${this.patternRegex}"
           ?inline-input="${this.inlineInput}"
           ?monday-first="${this.mondayFirst}"
+          ?allow-partial="${this.allowPartial}"
           @select-date="${this.updateSelectedDate}"
           @select-start-month="${this.updateSelectedMonth("start")}"
           @select-start-year="${this.updateSelectedYear("start")}"
@@ -121,21 +130,68 @@ export class MvCalendar extends LitElement {
         max-year="${this.maxYear}"
         .placeholder="${this.placeholder}"
         .theme="${this.theme}"
-        .visible-month="${this["visible-month"]}"
-        .selected-date="${this["selected-date"]}"
+        .visible="${this.visible}"
+        .selected="${this.selected}"
         .pattern="${this.pattern}"
         .pattern-matcher="${this.patternMatcher}"
         .pattern-regex="${this.patternRegex}"
         ?inline-input="${this.inlineInput}"
         ?monday-first="${this.mondayFirst}"
-        @select-date="${this.updateSelectedDate}"
-        @select-month="${this.updateSelectedMonth()}"
-        @select-year="${this.updateSelectedYear()}"
+        ?allow-partial="${this.allowPartial}"
+        @select-visible="${this.updateVisible}"
+        @select-date="${this.updateSelected}"
       ></single-calendar>
     `;
   }
 
-  updateSelectedDate = (event) => {
+  updateSelected = (event) => {
+    const { name } = this;
+    const {
+      detail: { selected },
+    } = event;
+    this.dispatchEvent(
+      new CustomEvent(`select-date`, { detail: { name, ...selected } })
+    );
+  };
+
+  updatePartial = (event) => {
+    const {
+      detail: { partial },
+    } = event;
+    this.dispatchEvent(
+      new CustomEvent("select-partial", { detail: { ...partial } })
+    );
+  };
+
+  updateVisible = (event) => {
+    const {
+      detail: { date, day, month, year },
+    } = event;
+    this.visible = { date, day, month, year };
+  };
+
+  updateSelectedRange = (event) => {
+    const { name } = this;
+    const {
+      detail: { date, start, end },
+    } = event;
+    this.dispatchEvent(
+      new CustomEvent(`select-date`, {
+        detail: { name, date, start, end },
+      })
+    );
+  };
+
+  updatePartialRange = (event) => {
+    const {
+      detail: { day, month, year },
+    } = event;
+    this.dispatchEvent(
+      new CustomEvent("select-partial", { detail: { day, month, year } })
+    );
+  };
+
+  updateVisibleRange = (event) => {
     const { name } = this;
     const {
       detail: { date, start, end },

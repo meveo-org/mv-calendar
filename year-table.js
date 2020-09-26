@@ -1,4 +1,5 @@
 import { LitElement, html, css } from "lit-element";
+import { EMPTY_DATE, NOW } from "./utils/index.js";
 
 const ROWS = 3;
 const YEARS_PER_ROW = 5;
@@ -20,8 +21,8 @@ const mapYearTable = (year) => {
 export class YearTable extends LitElement {
   static get properties() {
     return {
-      "visible-year": { type: Object, attribute: false, reflect: true },
-      "selected-date": { type: Object, attribute: false, reflect: true },
+      visible: { type: Object, attribute: false, reflect: true },
+      selected: { type: Object, attribute: false, reflect: true },
       minYear: { type: Number, attribute: "min-year", reflect: true },
       maxYear: { type: Number, attribute: "max-year", reflect: true },
       yearIndex: { type: Number, attribute: false, reflect: true },
@@ -113,18 +114,15 @@ export class YearTable extends LitElement {
 
   constructor() {
     super();
-    this["visible-year"] = new Date();
-    this.year = new Date().getFullYear();
+    this.selected = { ...EMPTY_DATE };
+    this.visible = { ...NOW };
     this.yearIndex = 0;
   }
 
   render() {
-    const selectedYear =
-      !!this["selected-date"] && this["selected-date"].getFullYear();
-    const visibleYear =
-      !!this["visible-year"] && this["visible-year"].getFullYear();
-    const hasSelectedYear = !!selectedYear;
-    const currentYear = hasSelectedYear ? selectedYear : visibleYear;
+    const selectedYear = this.selected.year;
+    const visibleYear = this.visible.year;
+    const currentYear = !!selectedYear ? selectedYear : visibleYear;
     const middleYear = currentYear + this.yearIndex;
     const backDisabled = middleYear - YEARS_OFFSET <= this.minYear;
     const nextDisabled = middleYear + YEARS_OFFSET >= this.maxYear;
@@ -138,18 +136,18 @@ export class YearTable extends LitElement {
                 <tr>
                   ${yearRow.map((year) => {
                     const selected = year === selectedYear ? "selected" : "";
-                    const now = year === this.year ? " now" : "";
+                    const now = year === NOW.year ? " now" : "";
                     const hasMinYear = this.minYear !== undefined;
                     const hasMaxYear = this.maxYear !== undefined;
                     const invalidMinYear = hasMinYear && year < this.minYear;
                     const invalidMaxYear = hasMaxYear && year > this.maxYear;
-                    const disabled =
-                      invalidMinYear || invalidMaxYear ? "disabled" : "";
+                    const isInvalid = invalidMinYear || invalidMaxYear;
+                    const disabled = isInvalid ? "disabled" : "";
                     return html`
                       <td>
                         <button
-                          ?disabled="${disabled}"
                           class="${selected}${now}"
+                          ?disabled="${disabled}"
                           @click="${this.selectYear(year)}"
                         >
                           ${year}
@@ -170,7 +168,7 @@ export class YearTable extends LitElement {
                 </button>
               </td>
               <td class="navigation-text" colspan="3">
-                <button @click="${this.selectNow}">Now</button>
+                <button @click="${this.selectYear(NOW.year)}">Now</button>
               </td>
               <td>
                 <button
@@ -195,27 +193,9 @@ export class YearTable extends LitElement {
     this.yearIndex = this.yearIndex + YEARS_PER_ROW * ROWS;
   };
 
-  selectNow = () => {
-    const year = new Date().getFullYear();
-    const selectedDate = this["selected-date"];
-    const hasSelectedDate = !!selectedDate;
-    const currentDate = hasSelectedDate ? selectedDate : this["visible-year"];
-    currentDate.setFullYear(year);
-    this.yearIndex = 0;
-    this.dispatchEvent(
-      new CustomEvent("select-year", { detail: { date: currentDate, year } })
-    );
-  };
-
   selectYear = (year) => () => {
-    const selectedDate = this["selected-date"];
-    const hasSelectedDate = !!selectedDate;
-    const currentDate = hasSelectedDate ? selectedDate : this["visible-year"];
-    currentDate.setFullYear(year);
     this.yearIndex = 0;
-    this.dispatchEvent(
-      new CustomEvent("select-year", { detail: { date: currentDate, year } })
-    );
+    this.dispatchEvent(new CustomEvent("select-year", { detail: { year } }));
   };
 }
 
