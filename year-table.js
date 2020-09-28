@@ -120,8 +120,9 @@ export class YearTable extends LitElement {
   }
 
   render() {
+    console.log("this.visible: ", this.visible);
     const selectedYear = this.selected.year;
-    const visibleYear = this.visible.year;
+    const visibleYear = this.visible.year || NOW.year;
     const currentYear = !!selectedYear ? selectedYear : visibleYear;
     const middleYear = currentYear + this.yearIndex;
     const backDisabled = middleYear - YEARS_OFFSET <= this.minYear;

@@ -10,8 +10,8 @@ export class DropdownCalendar extends LitElement {
       placeholder: { type: String },
       position: { type: String },
       pattern: { type: String },
-      "month-shown": { type: Object, attribute: false, reflect: true },
-      "selected-date": { type: Object, attribute: false, reflect: true },
+      visible: { type: Object, attribute: false, reflect: true },
+      selected: { type: Object, attribute: false, reflect: true },
       inputDate: { type: String, attribute: false, reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
       minYear: { type: Number, attribute: "min-year", reflect: true },
@@ -70,7 +70,7 @@ export class DropdownCalendar extends LitElement {
 
   constructor() {
     super();
-    this["month-shown"] = new Date();
+    this.visible = new Date();
     this.theme = "light";
     this.justify = "left";
     this.position = "bottom";

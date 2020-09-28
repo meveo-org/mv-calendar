@@ -24,13 +24,6 @@ export class MvCalendarDemo extends LitElement {
         margin-left: 50px;
       }
 
-      .main {
-        width: 300px;
-        margin-left: 50px;
-        display: flex;
-        flex-direction: column;
-      }
-
       fieldset > label,
       label > input {
         cursor: pointer;
@@ -49,6 +42,24 @@ export class MvCalendarDemo extends LitElement {
       legend {
         font-weight: 500;
         color: red;
+      }
+
+      pre {
+        border: 1px solid black;
+        margin: 0 50px;
+        padding: 20px;
+      }
+
+      .main-container {
+        display: grid;
+        grid-template-columns: 60% 40%;
+      }
+
+      .main {
+        width: 300px;
+        margin-left: 50px;
+        display: flex;
+        flex-direction: column;
       }
     `;
   }
@@ -96,54 +107,51 @@ export class MvCalendarDemo extends LitElement {
         </label>
       </fieldset>
 
-      <pre>${JSON.stringify(this.displayDates, null, 2)}</pre>
-
-      <div class="main">
-        <div>
-          <h4>Calendar with input field</h4>
-          <mv-calendar
-            name="inputCalendar"
-            dropdown
-            allow-partial
-            .theme="${theme}"
-            .selected-date="${this.selectedDates.inputCalendar}"
-            @select-date="${this.changeDate}"
-            @select-partial="${this.updatePartial}"
-          ></mv-calendar>
+      <div class="main-container">
+        <div class="main">
+          <div>
+            <h4>Calendar with input field</h4>
+            <mv-calendar
+              name="inputCalendar"
+              dropdown
+              allow-partial
+              .theme="${theme}"
+              .selected="${this.selectedDates.inputCalendar}"
+              @select-date="${this.changeDate}"
+            ></mv-calendar>
+          </div>
+          <div>
+            <h4>
+              Single Calendar with Monday first<br />
+              min-year=2010, max-year=2030
+            </h4>
+            <mv-calendar
+              name="singleCalendar"
+              placeholder="Single Calendar"
+              allow-partial
+              inline-input
+              monday-first
+              min-year="2010"
+              max-year="2030"
+              .theme="${theme}"
+              .selected="${this.selectedDates.singleCalendar}"
+              @select-date="${this.changeDate}"
+            ></mv-calendar>
+          </div>
+          <div>
+            <h4>Calendar with date range</h4>
+            <mv-calendar
+              name="rangeCalendar"
+              range-calendar
+              allow-partial
+              inline-input
+              .theme="${theme}"
+              .selected="${this.selectedDates.rangeCalendar}"
+              @select-date="${this.changeDate}"
+            ></mv-calendar>
+          </div>
         </div>
-        <div>
-          <h4>
-            Single Calendar with Monday first<br />
-            min-year=2010, max-year=2030
-          </h4>
-          <mv-calendar
-            name="singleCalendar"
-            placeholder="Single Calendar"
-            allow-partial
-            inline-input
-            monday-first
-            min-year="2010"
-            max-year="2030"
-            .theme="${theme}"
-            .selected="${this.selectedDates.singleCalendar}"
-            @select-date="${this.changeDate}"
-            @select-partial="${this.updatePartial}"
-          ></mv-calendar>
-        </div>
-        <div>
-          <h4>Calendar with date range</h4>
-          <mv-calendar
-            name="rangeCalendar"
-            range-calendar
-            allow-partial
-            inline-input
-            .theme="${theme}"
-            .start-date="${this.selectedDates.rangeCalendar.start}"
-            .end-date="${this.selectedDates.rangeCalendar.end}"
-            @select-date="${this.changeDate}"
-            @select-partial="${this.updatePartial}"
-          ></mv-calendar>
-        </div>
+        <pre>${JSON.stringify(this.displayDates, null, 2)}</pre>
       </div>
     `;
   }
@@ -155,52 +163,32 @@ export class MvCalendarDemo extends LitElement {
     this.theme = value;
   };
 
-  hideDropdown = (event) => {
-    const { target } = event;
-    target.dispatchEvent(
-      new CustomEvent("close-mv-dropdown", { bubbles: true })
-    );
-  };
-
   formatDate = (value) => {
-    const { date } = value;
-    return !!date ? moment(date.getTime()).format("MM/DD/YYYY") : "";
+    const { date, year, month, day } = value;
+    return { date, year, month, day };
   };
 
   changeDate = (event) => {
     const {
-      detail: { name, date, start, end },
+      detail: { name, selected },
     } = event;
 
-    const value =
+    const formattedDate =
       name === "rangeCalendar"
-        ? { start: this.formatDate(start), end: this.formatDate(end) }
-        : this.formatDate(date);
+        ? {
+            start: this.formatDate(selected.start),
+            end: this.formatDate(selected.end),
+          }
+        : this.formatDate(selected);
 
     this.displayDates = {
       ...this.displayDates,
-      [name]: value,
+      [name]: formattedDate,
     };
-  };
-
-  updatePartial = (event) => {
-    const {
-      detail: {
-        name,
-        date,
-        day,
-        month,
-        year,
-        startMonth,
-        startYear,
-        endMonth,
-        endYear,
-      },
-    } = event;
-
-    console.log("day: ", day);
-    console.log("month: ", month);
-    console.log("year: ", year);
+    this.selectedDates = {
+      ...this.selectedDates,
+      [name]: selected,
+    };
   };
 }
 

@@ -14,7 +14,7 @@ export class MvCalendar extends LitElement {
       dropdown: { type: Boolean },
       selected: { type: Object, attribute: false, reflect: true },
       visible: { type: Object, attribute: false, reflect: true },
-      "selected-range": { type: Object, attribute: false, reflect: true },
+      range: { type: Object, attribute: false, reflect: true },
       "visible-range": { type: Object, attribute: false, reflect: true },
       inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
@@ -95,7 +95,7 @@ export class MvCalendar extends LitElement {
           ?monday-first="${this.mondayFirst}"
           ?allow-partial="${this.allowPartial}"
           ?no-clear-button="${this.noClearButton}"
-          @select-date="${this.updateSelectedDate}"
+          @select-date="${this.updateSelected}"
         ></dropdown-calendar>
       `;
     } else if (this.rangeCalendar) {
@@ -116,11 +116,7 @@ export class MvCalendar extends LitElement {
           ?inline-input="${this.inlineInput}"
           ?monday-first="${this.mondayFirst}"
           ?allow-partial="${this.allowPartial}"
-          @select-date="${this.updateSelectedDate}"
-          @select-start-month="${this.updateSelectedMonth("start")}"
-          @select-start-year="${this.updateSelectedYear("start")}"
-          @select-end-month="${this.updateSelectedMonth("end")}"
-          @select-end-year="${this.updateSelectedYear("end")}"
+          @select-date="${this.updateSelected}"
         ></range-calendar>
       `;
     }
@@ -138,7 +134,6 @@ export class MvCalendar extends LitElement {
         ?inline-input="${this.inlineInput}"
         ?monday-first="${this.mondayFirst}"
         ?allow-partial="${this.allowPartial}"
-        @select-visible="${this.updateVisible}"
         @select-date="${this.updateSelected}"
       ></single-calendar>
     `;
@@ -147,93 +142,13 @@ export class MvCalendar extends LitElement {
   updateSelected = (event) => {
     const { name } = this;
     const {
-      detail: { selected },
+      detail: { selected, visible },
     } = event;
-    this.dispatchEvent(
-      new CustomEvent(`select-date`, { detail: { name, ...selected } })
-    );
-  };
 
-  updatePartial = (event) => {
-    const {
-      detail: { partial },
-    } = event;
-    this.dispatchEvent(
-      new CustomEvent("select-partial", { detail: { ...partial } })
-    );
-  };
+    this.visible = visible;
 
-  updateVisible = (event) => {
-    const {
-      detail: { date, day, month, year },
-    } = event;
-    this.visible = { date, day, month, year };
-  };
-
-  updateSelectedRange = (event) => {
-    const { name } = this;
-    const {
-      detail: { date, start, end },
-    } = event;
     this.dispatchEvent(
-      new CustomEvent(`select-date`, {
-        detail: { name, date, start, end },
-      })
-    );
-  };
-
-  updatePartialRange = (event) => {
-    const {
-      detail: { day, month, year },
-    } = event;
-    this.dispatchEvent(
-      new CustomEvent("select-partial", { detail: { day, month, year } })
-    );
-  };
-
-  updateVisibleRange = (event) => {
-    const { name } = this;
-    const {
-      detail: { date, start, end },
-    } = event;
-    this.dispatchEvent(
-      new CustomEvent(`select-date`, {
-        detail: { name, date, start, end },
-      })
-    );
-  };
-
-  updateSelectedMonth = (range) => (event) => {
-    const selectedDate = this["selected-date"];
-    const {
-      detail: { date, month },
-    } = event;
-    const newDate = selectedDate || date;
-    newDate.setMonth(month);
-    const name = `visible${!!range ? `-${range}` : ""}-month`;
-    const monthName = !!range ? `${range}Month` : "month";
-    this[name] = newDate;
-    this.dispatchEvent(
-      new CustomEvent(`select-partial`, {
-        detail: { name, date: newDate, [monthName]: month },
-      })
-    );
-  };
-
-  updateSelectedYear = (range) => (event) => {
-    const selectedDate = this["selected-date"];
-    const {
-      detail: { date, year },
-    } = event;
-    const newDate = selectedDate || date;
-    newDate.setFullYear(year);
-    const name = `visible${!!range ? `-${range}` : ""}-month`;
-    const yearName = !!range ? `${range}Year` : "year";
-    this[name] = newDate;
-    this.dispatchEvent(
-      new CustomEvent(`select-partial`, {
-        detail: { name, date: newDate, [yearName]: year },
-      })
+      new CustomEvent("select-date", { detail: { name, selected } })
     );
   };
 }

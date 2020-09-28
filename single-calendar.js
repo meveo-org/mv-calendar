@@ -1,5 +1,12 @@
 import { LitElement, html, css } from "lit-element";
-import { EMPTY_DATE, isEmpty, getCurrentDate } from "./utils/index.js";
+import {
+  EMPTY_DATE,
+  NOW,
+  isEmpty,
+  initializeDate,
+  parseInput,
+  validateDate,
+} from "./utils/index.js";
 import { MONTHS } from "./month-table.js";
 import "mv-container";
 import "mv-input";
@@ -11,7 +18,7 @@ export class SingleCalendar extends LitElement {
     return {
       theme: { type: String },
       placeholder: { type: String },
-      selected: { type: Object, attribute: false, reflect: true },
+      selected: { type: Object, attribute: true, reflect: true },
       visible: { type: Object, attribute: false, reflect: true },
       inputDate: { type: String, attribute: false, reflect: true },
       monthTableVisible: { type: Boolean, attribute: false, reflect: true },
@@ -46,6 +53,7 @@ export class SingleCalendar extends LitElement {
         --mv-container-min-width: calc(var(--width) + 4px);
         --mv-container-max-width: calc(var(--width) + 4px);
         --mv-container-padding: 10px;
+        --mv-container-margin: 0;
       }
 
       .light {
@@ -123,7 +131,7 @@ export class SingleCalendar extends LitElement {
     this.monthTableVisible = false;
     this.yearTableVisible = false;
     this.selected = { ...EMPTY_DATE };
-    this.visible = { ...EMPTY_DATE };
+    this.visible = { ...NOW };
   }
 
   render() {
@@ -138,12 +146,12 @@ export class SingleCalendar extends LitElement {
   }
 
   renderCalendar = () => {
-    const selected = this.selected;
-    const visible = this.visible;
+    const { selected, visible } = this;
     const selectedMonth = this.monthTableVisible ? " selected" : "";
     const selectedYear = this.yearTableVisible ? " selected" : "";
     const monthButton = `current-month${selectedMonth}`;
     const yearButton = `current-year${selectedYear}`;
+
     return html`
       <div class="mv-calendar ${this.theme}">
         <slot name="header">
@@ -154,7 +162,7 @@ export class SingleCalendar extends LitElement {
             ${MONTHS[visible.month]}
           </button>
           <button class="${yearButton}" @click="${this.toggleYearTable}">
-            ${visible.year}
+            ${visible.year || NOW.year}
           </button>
         </div>
         ${this.monthTableVisible
@@ -194,13 +202,12 @@ export class SingleCalendar extends LitElement {
   };
 
   renderInlineInput = () => {
-    const value = !!this.selected.date
-      ? moment(this.selected.date.getTime()).format(this.pattern)
-      : "";
-    const pattern = this.allowPartial ? "YYYY/MM/DD" : this.pattern;
-    const patternMatcher = this.allowPartial ? "MDY" : this.patternMatcher;
-    const patternRegex = this.allowPartial ? "\\d" : this.patternRegex;
-    const placeholder = this.placeholder || pattern;
+    const { selected, allowPartial, pattern } = this;
+    const properties = parseInput(selected, allowPartial, pattern);
+    const placeholder = this.placeholder || properties.pattern;
+    const patternMatcher = properties.patternMatcher || this.patternMatcher;
+    const patternRegex = properties.patternRegex || this.patternRegex;
+    const value = properties.value;
     return html`
       <div class="inline-input">
         <mv-input
@@ -208,23 +215,20 @@ export class SingleCalendar extends LitElement {
           .theme="${this.theme}"
           .value="${value}"
           placeholder="${placeholder}"
-          pattern="${pattern}"
+          pattern="${properties.pattern}"
           pattern-matcher="${patternMatcher}"
           pattern-regex="${patternRegex}"
           ?has-error="${this.hasError}"
-          @input-change="${this.updateSelected}"
+          @input-change="${this.updateEnteredValue}"
         ></mv-input>
       </div>
     `;
   };
 
   connectedCallback() {
-    super.connectedCallback();
     const hasSelectedDate = !isEmpty(this.selected);
-    const hasVisibleMonth = !isEmpty(this.visible);
-    if (!hasVisibleMonth) {
-      this.visible = hasSelectedDate ? this.selected : getCurrentDate();
-    }
+    this.visible = hasSelectedDate ? this.selected : this.visible || NOW;
+    super.connectedCallback();
   }
 
   toggleMonthTable = () => {
@@ -240,8 +244,12 @@ export class SingleCalendar extends LitElement {
   updateDay = (event) => {
     const { detail } = event;
     const { day, month, year } = detail;
-    this.visible = { day, month, year };
-    this.selected = { day, month, year };
+    const isEmptyDate = isEmpty({ day, month, year });
+    this.visible = isEmptyDate ? { ...NOW } : { day, month, year };
+    const selected = isEmptyDate
+      ? { ...EMPTY_DATE }
+      : { date: new Date(year, month, day), day, month, year };
+    this.dispatchUpdates(selected);
   };
 
   updateMonth = (event) => {
@@ -249,7 +257,9 @@ export class SingleCalendar extends LitElement {
     const { month } = detail;
     this.visible = { ...this.visible, month };
     if (this.allowPartial) {
-      this.selected = { ...this.selected, day: "", month };
+      const year = !!this.selected.year ? this.selected.year : NOW.year;
+      const selected = { ...initializeDate(this.selected), day: "", month, year };
+      this.dispatchUpdates(selected);
     }
     this.monthTableVisible = false;
   };
@@ -261,83 +271,61 @@ export class SingleCalendar extends LitElement {
     if (this.allowPartial) {
       const sameMonth = this.visible.month === this.selected.month;
       const sameYear = this.visible.year === this.selected.year;
-      const day = sameMonth && sameYear ? this.selected.day : ""
-      this.selected = { ...this.selected, day, year };
+      const day = sameMonth && sameYear ? this.selected.day : "";
+      const selected = { ...initializeDate(this.selected), day, year };
+      this.dispatchUpdates(selected);
     }
     this.yearTableVisible = false;
   };
 
-  updateSelected = (event) => {
-    if (this.allowPartial) {
-      this.parsePartial(event);
-    } else {
-      this.parseSelected(event);
-    }
-  };
-
-  parsePartial = (event) => {
+  updateEnteredValue = (event) => {
     const {
       detail: { value },
     } = event;
     const dateArray = (!!value && value.split("/")) || [];
-    const [year, month, day] = dateArray;
-    const isValidYear = !isNaN(year);
-    const isValidMonth = !isNaN(month);
-    const isValidDay = !isNaN(day);
+    const [year, month, day] = dateArray.map((part) => Number(part));
+
+    const hasValidYear = !!year && !isNaN(year);
+    const hasValidMinYear =
+      hasValidYear && !(this.minYear !== undefined && year < this.minYear);
+    const hasValidMaxYear =
+      hasValidYear && !(this.maxYear !== undefined && year > this.maxYear);
+
+    const isValidYear = hasValidYear && hasValidMinYear && hasValidMaxYear;
+    const isValidMonth = !!month && !isNaN(month) && month > 0 && month < 13;
+    const isValidDay = !!day && !isNaN(day) && day;
+
+    const selected = {};
     if (isValidYear) {
-      this.partialDate.year = year;
+      selected.year = year;
     }
     if (isValidMonth) {
-      this.partialDate.month = month;
+      selected.month = month - 1;
     }
     if (isValidDay) {
-      this.partialDate.day = day;
-      this.partialDate.year = isValidYear ? year : null;
+      selected.day = day;
     }
-    this.dispatchEvent(
-      new CustomEvent("select-partial", { detail: { ...this.partialDate } })
-    );
+
+    const validationDetails = validateDate(selected);
+    const { hasFullDate, hasYearOnly, hasYearAndMonthOnly } = validationDetails;
+    const isValid = hasFullDate || hasYearOnly || hasYearAndMonthOnly;
+    this.hasError = !isValid;
+    if (isValid) {
+      this.visible = { ...this.visible, ...selected };
+      if (hasFullDate) {
+        selected.date = new Date(selected.year, selected.month, selected.day);
+      }
+      this.dispatchUpdates({ ...EMPTY_DATE, ...selected });
+    } else {
+      this.dispatchUpdates({ ...EMPTY_DATE });
+    }
   };
 
-  parseSelected = (event) => {
-    const {
-      detail: { value, date },
-    } = event;
-    const enteredDate = new Date(value);
-
-    const invalidEnteredDate = !(
-      enteredDate instanceof Date && !isNaN(enteredDate)
+  dispatchUpdates = (selected) => {
+    const { visible } = this;
+    this.dispatchEvent(
+      new CustomEvent("select-date", { detail: { selected, visible } })
     );
-
-    this.hasError =
-      value !== "" &&
-      value !== this.pattern &&
-      invalidEnteredDate &&
-      date !== null &&
-      !date;
-
-    const selectedDate = date || enteredDate;
-
-    if (!!date || !invalidEnteredDate) {
-      this["selected-date"] = selectedDate;
-      this["visible-month"] = selectedDate;
-      this.dispatchEvent(
-        new CustomEvent("select-date", {
-          detail: {
-            date: selectedDate,
-          },
-        })
-      );
-    } else if (!date || !value) {
-      this["selected-date"] = null;
-      this.dispatchEvent(
-        new CustomEvent("select-date", {
-          detail: {
-            date: null,
-          },
-        })
-      );
-    }
   };
 }
 

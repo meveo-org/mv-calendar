@@ -7,10 +7,24 @@ export const isEmpty = (testDate) => {
   return isEmptyDay && isEmptyMonth && isEmptyYear;
 };
 
+const parseDate = (date) => {
+  const dateObject = (!!date && date.date) || {
+    getFullYear: () => date.year,
+    getMonth: () => date.month,
+    getDate: () => date.day,
+  };
+  const year = dateObject.getFullYear();
+  const month = dateObject.getMonth();
+  const day = dateObject.getDate();
+  return { day, month, year };
+};
+
 export const isEqual = (current, next) => {
-  const isEqualDay = current.day === next.day;
-  const isEqualMonth = current.month === next.month;
-  const isEqualYear = current.year === next.year;
+  const currentDate = parseDate(current);
+  const nextDate = parseDate(next);
+  const isEqualDay = currentDate.day === nextDate.day;
+  const isEqualMonth = currentDate.month === nextDate.month;
+  const isEqualYear = currentDate.year === nextDate.year;
   return isEqualDay && isEqualMonth && isEqualYear;
 };
 
@@ -47,4 +61,62 @@ export const generateWeekDates = (details) => {
       weekDates.slice(week * 7, week * 7 + 7)
     );
   }
+};
+
+export const validateDate = ({ date, year, month, day }) => {
+  const hasSelectedDate = !!date;
+  const hasYear = !!year;
+  const hasMonth = !!month || month === 0;
+  const hasDay = !!day;
+  const hasFullDate = hasYear && hasMonth && hasDay;
+  const hasYearOnly = hasYear && !hasMonth && !hasDay;
+  const hasYearAndMonthOnly = hasYear && hasMonth && !hasDay;
+  return { hasSelectedDate, hasYearOnly, hasYearAndMonthOnly, hasFullDate };
+};
+
+export const parseInput = (selected, allowPartial, inputPattern) => {
+  const { date, year, month, day } = selected;
+  const hasSelectedDate = !!date;
+  const hasYear = !!year;
+  const hasMonth = !!month || month === 0;
+  const hasDay = !!day;
+  const hasFullDate = hasYear && hasMonth && hasDay;
+  const hasYearOnly = hasYear && !hasMonth && !hasDay;
+  const hasYearAndMonthOnly = hasYear && hasMonth && !hasDay;
+
+  const result = {};
+
+  let selectedDate = date;
+
+  if (!hasSelectedDate) {
+    if (hasYearOnly) {
+      selectedDate = new Date();
+      selectedDate.setFullYear(year);
+    } else if (hasYearAndMonthOnly) {
+      selectedDate = new Date(year, month);
+    } else if (hasFullDate) {
+      selectedDate = new Date(year, month, day);
+    } else {
+      selectedDate = null;
+    }
+  }
+
+  result.pattern = inputPattern;
+
+  if (allowPartial) {
+    result.patternMatcher = "MDY";
+    result.patternRegex = "\\d";
+    if (hasYearOnly) {
+      result.pattern = "YYYY";
+    } else if (hasYearAndMonthOnly) {
+      result.pattern = "YYYY/MM";
+    } else {
+      result.pattern = "YYYY/MM/DD";
+    }
+  }
+  result.value = !!selectedDate
+    ? moment(selectedDate.getTime()).format(result.pattern)
+    : "";
+
+  return result;
 };

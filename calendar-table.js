@@ -6,7 +6,6 @@ import {
   START_ON_SUNDAY,
   isEmpty,
   isEqual,
-  initializeDate,
   generateWeekDates,
 } from "./utils/index.js";
 
@@ -217,10 +216,10 @@ export class CalendarTable extends LitElement {
   selectDate = (date) => () => {
     if (!isEmpty(date)) {
       const isCurrentDate = isEqual(date, this.selected);
-      const chosenDate = isCurrentDate ? {...EMPTY_DATE} : date;
+      const chosenDate = isCurrentDate ? { ...EMPTY_DATE } : date;
       this.dispatchEvent(
         new CustomEvent("select-date", { detail: { ...chosenDate } })
-      );      
+      );
     }
   };
 }
