@@ -258,7 +258,12 @@ export class SingleCalendar extends LitElement {
     this.visible = { ...this.visible, month };
     if (this.allowPartial) {
       const year = !!this.selected.year ? this.selected.year : NOW.year;
-      const selected = { ...initializeDate(this.selected), day: "", month, year };
+      const selected = {
+        ...initializeDate(this.selected),
+        day: "",
+        month,
+        year,
+      };
       this.dispatchUpdates(selected);
     }
     this.monthTableVisible = false;
@@ -282,42 +287,49 @@ export class SingleCalendar extends LitElement {
     const {
       detail: { value },
     } = event;
-    const dateArray = (!!value && value.split("/")) || [];
-    const [year, month, day] = dateArray.map((part) => Number(part));
+    const hasValue = !!value;
+    if (hasValue) {
+      const dateArray = value.split("/") || [];
+      const [year, month, day] = dateArray.map((part) => Number(part));
 
-    const hasValidYear = !!year && !isNaN(year);
-    const hasValidMinYear =
-      hasValidYear && !(this.minYear !== undefined && year < this.minYear);
-    const hasValidMaxYear =
-      hasValidYear && !(this.maxYear !== undefined && year > this.maxYear);
+      const hasValidYear = !!year && !isNaN(year);
+      const hasValidMinYear =
+        hasValidYear && !(this.minYear !== undefined && year < this.minYear);
+      const hasValidMaxYear =
+        hasValidYear && !(this.maxYear !== undefined && year > this.maxYear);
 
-    const isValidYear = hasValidYear && hasValidMinYear && hasValidMaxYear;
-    const isValidMonth = !!month && !isNaN(month) && month > 0 && month < 13;
-    const isValidDay = !!day && !isNaN(day) && day;
+      const isValidYear = hasValidYear && hasValidMinYear && hasValidMaxYear;
+      const isValidMonth = !!month && !isNaN(month) && month > 0 && month < 13;
+      const isValidDay = !!day && !isNaN(day) && day;
 
-    const selected = {};
-    if (isValidYear) {
-      selected.year = year;
-    }
-    if (isValidMonth) {
-      selected.month = month - 1;
-    }
-    if (isValidDay) {
-      selected.day = day;
-    }
-
-    const validationDetails = validateDate(selected);
-    const { hasFullDate, hasYearOnly, hasYearAndMonthOnly } = validationDetails;
-    const isValid = hasFullDate || hasYearOnly || hasYearAndMonthOnly;
-    this.hasError = !isValid;
-    if (isValid) {
-      this.visible = { ...this.visible, ...selected };
-      if (hasFullDate) {
-        selected.date = new Date(selected.year, selected.month, selected.day);
+      const selected = {};
+      if (isValidYear) {
+        selected.year = year;
       }
-      this.dispatchUpdates({ ...EMPTY_DATE, ...selected });
-    } else {
-      this.dispatchUpdates({ ...EMPTY_DATE });
+      if (isValidMonth) {
+        selected.month = month - 1;
+      }
+      if (isValidDay) {
+        selected.day = day;
+      }
+
+      const validationDetails = validateDate(selected);
+      const {
+        hasFullDate,
+        hasYearOnly,
+        hasYearAndMonthOnly,
+      } = validationDetails;
+      const isValid = hasFullDate || hasYearOnly || hasYearAndMonthOnly;
+      this.hasError = !isValid;
+      if (isValid) {
+        this.visible = { ...this.visible, ...selected };
+        if (hasFullDate) {
+          selected.date = new Date(selected.year, selected.month, selected.day);
+        }
+        this.dispatchUpdates({ ...EMPTY_DATE, ...selected });
+      } else {
+        this.dispatchUpdates({ ...EMPTY_DATE });
+      }
     }
   };
 

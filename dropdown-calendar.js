@@ -1,4 +1,12 @@
 import { LitElement, html, css } from "lit-element";
+import {
+  EMPTY_DATE,
+  NOW,
+  isEmpty,
+  initializeDate,
+  parseInput,
+  validateDate,
+} from "./utils/index.js";
 import "mv-dropdown";
 import "./single-calendar.js";
 
@@ -84,9 +92,12 @@ export class DropdownCalendar extends LitElement {
   }
 
   render() {
-    const { theme } = this;
-    const pattern = this.allowPartial ? "YYYY/MM/DD" : this.pattern;
-    const placeholder = this.placeholder || pattern;
+    const { theme, selected, allowPartial, pattern } = this;
+    const properties = parseInput(selected, allowPartial, pattern);
+    const patternMatcher = properties.patternMatcher || this.patternMatcher;
+    const patternRegex = properties.patternRegex || this.patternRegex;
+    const placeholder = this.placeholder || properties.pattern;
+    const value = properties.value;
     return html`
       <mv-dropdown
         container
@@ -97,13 +108,13 @@ export class DropdownCalendar extends LitElement {
         <mv-dropdown trigger>
           <mv-input
             .theme="${theme}"
-            value="${this.inputDate}"
+            value="${value}"
             placeholder="${placeholder}"
-            pattern="${pattern}"
-            pattern-matcher="${this.allowPartial ? "MDY" : this.patternMatcher}"
-            pattern-regex="${this.allowPartial ? "\\d" : this.patternRegex}"
+            pattern="${properties.pattern}"
+            pattern-matcher="${patternMatcher}"
+            pattern-regex="${patternRegex}"
             ?has-error="${this.hasError}"
-            @input-change="${this.updateSelectedDate}"
+            @input-change="${this.updateEnteredValue}"
           >
             ${this.noClearButton
               ? html``
@@ -124,8 +135,8 @@ export class DropdownCalendar extends LitElement {
             min-year="${this.minYear}"
             max-year="${this.maxYear}"
             .theme="${this.theme}"
-            .month-shown="${this["month-shown"]}"
-            .selected-date="${this["selected-date"]}"
+            .visible="${this.visible}"
+            .selected="${this.selected}"
             .pattern="${this.pattern}"
             .pattern-matcher="${this.patternMatcher}"
             .pattern-regex="${this.patternRegex}"
@@ -148,46 +159,71 @@ export class DropdownCalendar extends LitElement {
 
   updateSelectedDate = (event) => {
     const {
-      detail: { value, date },
+      detail: { selected, visible },
     } = event;
-    console.log("value: ", value);
-    console.log("date: ", date);
-    const enteredDate = new Date(value);
-    const selectedDate = date || enteredDate;
-    const invalidEnteredDate = !(
-      enteredDate instanceof Date && !isNaN(enteredDate)
+    this.visible = visible;
+    this.dispatchUpdates(selected);
+  };
+
+  dispatchUpdates = (selected) => {
+    const { visible } = this;
+    this.dispatchEvent(
+      new CustomEvent("select-date", { detail: { selected, visible } })
     );
-    this.hasError =
-      value !== "" && invalidEnteredDate && date !== null && !date;
-    if (!!date || !invalidEnteredDate) {
-      const formattedDate = moment(selectedDate).format(this.pattern);
-      this.inputDate = formattedDate;
-      this["selected-date"] = selectedDate;
-      this["month-shown"] = selectedDate;
-      this.dispatchEvent(
-        new CustomEvent("select-date", {
-          detail: {
-            date: selectedDate,
-          },
-        })
-      );
-    } else {
-      this["selected-date"] = null;
-      this.inputDate = value || "";
-    }
   };
 
   clearSelectedDate = () => {
-    this.inputDate = "";
-    this.hasError = false;
-    this["selected-date"] = null;
-    this.dispatchEvent(
-      new CustomEvent("select-date", {
-        detail: {
-          date: null,
-        },
-      })
-    );
+    this.dispatchUpdates({ ...EMPTY_DATE });
+  };
+
+  updateEnteredValue = (event) => {
+    const {
+      detail: { value },
+    } = event;
+    const hasValue = !!value;
+    if (hasValue) {
+      const dateArray = value.split("/") || [];
+      const [year, month, day] = dateArray.map((part) => Number(part));
+
+      const hasValidYear = !!year && !isNaN(year);
+      const hasValidMinYear =
+        hasValidYear && !(this.minYear !== undefined && year < this.minYear);
+      const hasValidMaxYear =
+        hasValidYear && !(this.maxYear !== undefined && year > this.maxYear);
+
+      const isValidYear = hasValidYear && hasValidMinYear && hasValidMaxYear;
+      const isValidMonth = !!month && !isNaN(month) && month > 0 && month < 13;
+      const isValidDay = !!day && !isNaN(day) && day;
+
+      const selected = {};
+      if (isValidYear) {
+        selected.year = year;
+      }
+      if (isValidMonth) {
+        selected.month = month - 1;
+      }
+      if (isValidDay) {
+        selected.day = day;
+      }
+
+      const validationDetails = validateDate(selected);
+      const {
+        hasFullDate,
+        hasYearOnly,
+        hasYearAndMonthOnly,
+      } = validationDetails;
+      const isValid = hasFullDate || hasYearOnly || hasYearAndMonthOnly;
+      this.hasError = !isValid;
+      if (isValid) {
+        this.visible = { ...this.visible, ...selected };
+        if (hasFullDate) {
+          selected.date = new Date(selected.year, selected.month, selected.day);
+        }
+        this.dispatchUpdates({ ...EMPTY_DATE, ...selected });
+      } else {
+        this.dispatchUpdates({ ...EMPTY_DATE });
+      }
+    }
   };
 }
 
