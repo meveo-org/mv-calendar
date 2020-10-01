@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit-element";
-import { EMPTY_DATE, NOW } from "./utils/index.js";
+import { EMPTY_DATE } from "./utils/index.js";
 import "./mv-calendar.js";
 
 export class MvCalendarDemo extends LitElement {
@@ -74,7 +74,6 @@ export class MvCalendarDemo extends LitElement {
       rangeCalendar: {
         start: {
           selected: { ...EMPTY_DATE },
-          visible: { ...NOW },
           placeholder: "",
           hasError: null,
           minYear: null,
@@ -82,7 +81,6 @@ export class MvCalendarDemo extends LitElement {
         },
         end: {
           selected: { ...EMPTY_DATE },
-          visible: { ...NOW },
           placeholder: "",
           hasError: null,
           minYear: null,
