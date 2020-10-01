@@ -1,18 +1,12 @@
 import { LitElement, html, css } from "lit-element";
-import {
-  EMPTY_DATE,
-  NOW,
-  isEmpty,
-  initializeDate,
-  parseInput,
-  validateDate,
-} from "./utils/index.js";
 import "mv-dropdown";
+import "./calendar-input.js";
 import "./single-calendar.js";
 
 export class DropdownCalendar extends LitElement {
   static get properties() {
     return {
+      name: { type: String },
       theme: { type: String },
       justify: { type: String },
       placeholder: { type: String },
@@ -55,17 +49,6 @@ export class DropdownCalendar extends LitElement {
         --mv-dropdown-content-max-height: auto;
       }
 
-      mv-input > button {
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin: 0 var(--font-size-m) 0 0;
-        height: 100%;
-        outline: none;
-        color: #777;
-        cursor: pointer;
-      }
-
       mv-dropdown[content] {
         --mv-container-margin: 0;
       }
@@ -92,46 +75,33 @@ export class DropdownCalendar extends LitElement {
   }
 
   render() {
-    const { theme, selected, allowPartial, pattern } = this;
-    const properties = parseInput(selected, allowPartial, pattern);
-    const patternMatcher = properties.patternMatcher || this.patternMatcher;
-    const patternRegex = properties.patternRegex || this.patternRegex;
-    const placeholder = this.placeholder || properties.pattern;
-    const value = properties.value;
     return html`
       <mv-dropdown
         container
         .justify="${this.justify}"
         .position="${this.position}"
-        .theme="${theme}"
+        .theme="${this.theme}"
       >
         <mv-dropdown trigger>
-          <mv-input
-            .theme="${theme}"
-            value="${value}"
-            placeholder="${placeholder}"
-            pattern="${properties.pattern}"
-            pattern-matcher="${patternMatcher}"
-            pattern-regex="${patternRegex}"
-            ?has-error="${this.hasError}"
-            @input-change="${this.updateEnteredValue}"
-          >
-            ${this.noClearButton
-              ? html``
-              : html`
-                  <button
-                    slot="suffix"
-                    class="clear-button"
-                    @click="${this.clearSelectedDate}"
-                  >
-                    &times;
-                  </button>
-                `}
-          </mv-input>
+          <calendar-input
+            min-year="${this.minYear}"
+            max-year="${this.maxYear}"
+            .placeholder="${this.placeholder}"
+            .theme="${this.theme}"
+            .visible="${this.visible}"
+            .selected="${this.selected}"
+            .pattern="${this.pattern}"
+            .pattern-matcher="${this.patternMatcher}"
+            .pattern-regex="${this.patternRegex}"
+            ?allow-partial="${this.allowPartial}"
+            ?no-clear-button="${this.noClearButton}"
+            @select-date="${this.updateSelected}"
+          ></calendar-input>
         </mv-dropdown>
-        <mv-dropdown content .theme="${theme}">
+        <mv-dropdown content .theme="${this.theme}">
           <single-calendar
             no-border
+            name="${this.name}"
             min-year="${this.minYear}"
             max-year="${this.maxYear}"
             .theme="${this.theme}"
@@ -142,88 +112,22 @@ export class DropdownCalendar extends LitElement {
             .pattern-regex="${this.patternRegex}"
             ?monday-first="${this.mondayFirst}"
             ?allow-partial="${this.allowPartial}"
-            @select-date="${this.updateSelectedDate}"
+            @select-date="${this.updateSelected}"
           ></single-calendar>
         </mv-dropdown>
       </mv-dropdown>
     `;
   }
 
-  connectedCallback() {
-    const selectedDate = this["selected-date"];
-    this.inputDate = !!selectedDate
-      ? moment(selectedDate).format(this.pattern)
-      : "";
-    super.connectedCallback();
-  }
-
-  updateSelectedDate = (event) => {
+  updateSelected = (event) => {
     const {
       detail: { selected, visible },
     } = event;
+    const { name } = this;
     this.visible = visible;
-    this.dispatchUpdates(selected);
-  };
-
-  dispatchUpdates = (selected) => {
-    const { visible } = this;
     this.dispatchEvent(
-      new CustomEvent("select-date", { detail: { selected, visible } })
+      new CustomEvent("select-date", { detail: { name, selected, visible } })
     );
-  };
-
-  clearSelectedDate = () => {
-    this.dispatchUpdates({ ...EMPTY_DATE });
-  };
-
-  updateEnteredValue = (event) => {
-    const {
-      detail: { value },
-    } = event;
-    const hasValue = !!value;
-    if (hasValue) {
-      const dateArray = value.split("/") || [];
-      const [year, month, day] = dateArray.map((part) => Number(part));
-
-      const hasValidYear = !!year && !isNaN(year);
-      const hasValidMinYear =
-        hasValidYear && !(this.minYear !== undefined && year < this.minYear);
-      const hasValidMaxYear =
-        hasValidYear && !(this.maxYear !== undefined && year > this.maxYear);
-
-      const isValidYear = hasValidYear && hasValidMinYear && hasValidMaxYear;
-      const isValidMonth = !!month && !isNaN(month) && month > 0 && month < 13;
-      const isValidDay = !!day && !isNaN(day) && day;
-
-      const selected = {};
-      if (isValidYear) {
-        selected.year = year;
-      }
-      if (isValidMonth) {
-        selected.month = month - 1;
-      }
-      if (isValidDay) {
-        selected.day = day;
-      }
-
-      const validationDetails = validateDate(selected);
-      const {
-        hasFullDate,
-        hasYearOnly,
-        hasYearAndMonthOnly,
-      } = validationDetails;
-      const isValid = hasFullDate || hasYearOnly || hasYearAndMonthOnly;
-      this.hasError = !isValid;
-      if (isValid) {
-        this.visible = { ...this.visible, ...selected };
-        if (hasFullDate) {
-          selected.date = new Date(selected.year, selected.month, selected.day);
-        }
-        this.dispatchUpdates({ ...EMPTY_DATE, ...selected });
-      } else {
-        this.dispatchUpdates({ ...EMPTY_DATE });
-      }
-    }
   };
 }
 

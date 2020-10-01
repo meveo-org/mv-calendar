@@ -14,12 +14,10 @@ export class MvCalendar extends LitElement {
       dropdown: { type: Boolean },
       selected: { type: Object, attribute: false, reflect: true },
       visible: { type: Object, attribute: false, reflect: true },
-      range: { type: Object, attribute: false, reflect: true },
-      "visible-range": { type: Object, attribute: false, reflect: true },
       inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
-      startPlaceholder: { type: String, attribute: "start-placeholder" },
-      endPlaceholder: { type: String, attribute: "end-placeholder" },
+      start: { type: Object, attribute: false, reflect: true },
+      end: { type: Object, attribute: false, reflect: true },
       minYear: { type: Number, attribute: "min-year" },
       maxYear: { type: Number, attribute: "max-year" },
       pattern: { type: String },
@@ -67,13 +65,15 @@ export class MvCalendar extends LitElement {
     this.noClearButton = false;
     this.selected = { ...EMPTY_DATE };
     this.visible = { ...NOW };
-    this.selectedRange = {
-      start: { ...EMPTY_DATE },
-      end: { ...EMPTY_DATE },
+    this.start = {
+      selected: { ...EMPTY_DATE },
+      visible: { ...NOW },
+      placeholder: "",
     };
-    this.visibleRange = {
-      start: { ...NOW },
-      end: { ...NOW },
+    this.end = {
+      selected: { ...EMPTY_DATE },
+      visible: { ...NOW },
+      placeholder: "",
     };
   }
 
@@ -104,19 +104,15 @@ export class MvCalendar extends LitElement {
           min-year="${this.minYear}"
           max-year="${this.maxYear}"
           .theme="${this.theme}"
-          .start-date="${this["start-date"]}"
-          .visible-start-month="${this["visible-start-month"]}"
-          .start-placeholder="${this.startPlaceholder}"
-          .end-date="${this["end-date"]}"
-          .visible-end-month="${this["visible-end-month"]}"
-          .end-placeholder="${this.endPlaceholder}"
+          .start="${this.start}"
+          .end="${this.end}"
           .pattern="${this.pattern}"
           .pattern-matcher="${this.patternMatcher}"
           .pattern-regex="${this.patternRegex}"
           ?inline-input="${this.inlineInput}"
           ?monday-first="${this.mondayFirst}"
           ?allow-partial="${this.allowPartial}"
-          @select-date="${this.updateSelected}"
+          @select-range="${this.updateRange}"
         ></range-calendar>
       `;
     }
@@ -144,11 +140,20 @@ export class MvCalendar extends LitElement {
     const {
       detail: { selected, visible },
     } = event;
-
     this.visible = visible;
-
     this.dispatchEvent(
       new CustomEvent("select-date", { detail: { name, selected } })
+    );
+  };
+
+  updateRange = (event) => {
+    const { name } = this;
+    const { detail } = event;
+    const { start, end } = detail;
+    this.dispatchEvent(
+      new CustomEvent("select-date", {
+        detail: { name, selected: { start, end } },
+      })
     );
   };
 }

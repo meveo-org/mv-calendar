@@ -1,21 +1,16 @@
 import { LitElement, html, css } from "lit-element";
-import {
-  EMPTY_DATE,
-  NOW,
-  isEmpty,
-  initializeDate,
-  parseInput,
-  validateDate,
-} from "./utils/index.js";
+import { EMPTY_DATE, NOW, isEmpty, initializeDate } from "./utils/index.js";
 import { MONTHS } from "./month-table.js";
 import "mv-container";
 import "mv-input";
+import "./calendar-input.js";
 import "./calendar-table.js";
 import "./month-table.js";
 import "./year-table.js";
 export class SingleCalendar extends LitElement {
   static get properties() {
     return {
+      name: { type: String },
       theme: { type: String },
       placeholder: { type: String },
       selected: { type: Object, attribute: true, reflect: true },
@@ -155,7 +150,27 @@ export class SingleCalendar extends LitElement {
     return html`
       <div class="mv-calendar ${this.theme}">
         <slot name="header">
-          ${this.inlineInput ? this.renderInlineInput() : html``}
+          ${this.inlineInput
+            ? html`
+                <div class="inline-input">
+                  <calendar-input
+                    rounded
+                    min-year="${this.minYear}"
+                    max-year="${this.maxYear}"
+                    .placeholder="${this.placeholder}"
+                    .theme="${this.theme}"
+                    .visible="${this.visible}"
+                    .selected="${this.selected}"
+                    .pattern="${this.pattern}"
+                    .pattern-matcher="${this.patternMatcher}"
+                    .pattern-regex="${this.patternRegex}"
+                    ?allow-partial="${this.allowPartial}"
+                    ?no-clear-button="${this.noClearButton}"
+                    @select-date="${this.updateSelected}"
+                  ></calendar-input>
+                </div>
+              `
+            : html``}
         </slot>
         <div class="year-month-container">
           <button class="${monthButton}" @click="${this.toggleMonthTable}">
@@ -197,30 +212,6 @@ export class SingleCalendar extends LitElement {
             `
           : html``}
         <slot name="footer"></slot>
-      </div>
-    `;
-  };
-
-  renderInlineInput = () => {
-    const { selected, allowPartial, pattern } = this;
-    const properties = parseInput(selected, allowPartial, pattern);
-    const placeholder = this.placeholder || properties.pattern;
-    const patternMatcher = properties.patternMatcher || this.patternMatcher;
-    const patternRegex = properties.patternRegex || this.patternRegex;
-    const value = properties.value;
-    return html`
-      <div class="inline-input">
-        <mv-input
-          rounded
-          .theme="${this.theme}"
-          .value="${value}"
-          placeholder="${placeholder}"
-          pattern="${properties.pattern}"
-          pattern-matcher="${patternMatcher}"
-          pattern-regex="${patternRegex}"
-          ?has-error="${this.hasError}"
-          @input-change="${this.updateEnteredValue}"
-        ></mv-input>
       </div>
     `;
   };
@@ -283,60 +274,18 @@ export class SingleCalendar extends LitElement {
     this.yearTableVisible = false;
   };
 
-  updateEnteredValue = (event) => {
+  updateSelected = (event) => {
     const {
-      detail: { value },
+      detail: { selected, visible },
     } = event;
-    const hasValue = !!value;
-    if (hasValue) {
-      const dateArray = value.split("/") || [];
-      const [year, month, day] = dateArray.map((part) => Number(part));
-
-      const hasValidYear = !!year && !isNaN(year);
-      const hasValidMinYear =
-        hasValidYear && !(this.minYear !== undefined && year < this.minYear);
-      const hasValidMaxYear =
-        hasValidYear && !(this.maxYear !== undefined && year > this.maxYear);
-
-      const isValidYear = hasValidYear && hasValidMinYear && hasValidMaxYear;
-      const isValidMonth = !!month && !isNaN(month) && month > 0 && month < 13;
-      const isValidDay = !!day && !isNaN(day) && day;
-
-      const selected = {};
-      if (isValidYear) {
-        selected.year = year;
-      }
-      if (isValidMonth) {
-        selected.month = month - 1;
-      }
-      if (isValidDay) {
-        selected.day = day;
-      }
-
-      const validationDetails = validateDate(selected);
-      const {
-        hasFullDate,
-        hasYearOnly,
-        hasYearAndMonthOnly,
-      } = validationDetails;
-      const isValid = hasFullDate || hasYearOnly || hasYearAndMonthOnly;
-      this.hasError = !isValid;
-      if (isValid) {
-        this.visible = { ...this.visible, ...selected };
-        if (hasFullDate) {
-          selected.date = new Date(selected.year, selected.month, selected.day);
-        }
-        this.dispatchUpdates({ ...EMPTY_DATE, ...selected });
-      } else {
-        this.dispatchUpdates({ ...EMPTY_DATE });
-      }
-    }
+    this.visible = visible;
+    this.dispatchUpdates(selected);
   };
 
   dispatchUpdates = (selected) => {
-    const { visible } = this;
+    const { visible, name } = this;
     this.dispatchEvent(
-      new CustomEvent("select-date", { detail: { selected, visible } })
+      new CustomEvent("select-date", { detail: { name, selected, visible } })
     );
   };
 }

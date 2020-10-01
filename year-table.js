@@ -120,7 +120,6 @@ export class YearTable extends LitElement {
   }
 
   render() {
-    console.log("this.visible: ", this.visible);
     const selectedYear = this.selected.year;
     const visibleYear = this.visible.year || NOW.year;
     const currentYear = !!selectedYear ? selectedYear : visibleYear;

@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit-element";
-import { EMPTY_DATE } from "./utils/index.js";
+import { EMPTY_DATE, NOW } from "./utils/index.js";
 import "./mv-calendar.js";
 
 export class MvCalendarDemo extends LitElement {
@@ -68,16 +68,35 @@ export class MvCalendarDemo extends LitElement {
     super();
     this.theme = "light";
     this.selectedDates = {
-      inputCalendar: { ...EMPTY_DATE },
+      dropdownCalendar: { ...EMPTY_DATE },
+      dropdownCalendarAP: { ...EMPTY_DATE },
       singleCalendar: { ...EMPTY_DATE },
-      rangeCalendar: { start: { ...EMPTY_DATE }, end: { ...EMPTY_DATE } },
+      rangeCalendar: {
+        start: {
+          selected: { ...EMPTY_DATE },
+          visible: { ...NOW },
+          placeholder: "",
+          hasError: null,
+          minYear: null,
+          maxYear: null,
+        },
+        end: {
+          selected: { ...EMPTY_DATE },
+          visible: { ...NOW },
+          placeholder: "",
+          hasError: null,
+          minYear: null,
+          maxYear: null,
+        },
+      },
     };
     this.displayDates = {
-      inputCalendar: this.formatDate(this.selectedDates.inputCalendar),
+      dropdownCalendar: this.formatDate(this.selectedDates.dropdownCalendar),
+      dropdownCalendarAP: this.formatDate(this.selectedDates.dropdownCalendarAP),
       singleCalendar: this.formatDate(this.selectedDates.singleCalendar),
       rangeCalendar: {
-        start: this.formatDate(this.selectedDates.rangeCalendar.start),
-        end: this.formatDate(this.selectedDates.rangeCalendar.end),
+        start: this.formatDate(this.selectedDates.rangeCalendar.start.selected),
+        end: this.formatDate(this.selectedDates.rangeCalendar.end.selected),
       },
     };
   }
@@ -112,11 +131,21 @@ export class MvCalendarDemo extends LitElement {
           <div>
             <h4>Calendar with input field</h4>
             <mv-calendar
-              name="inputCalendar"
+              name="dropdownCalendar"
+              dropdown
+              .theme="${theme}"
+              .selected="${this.selectedDates.dropdownCalendar}"
+              @select-date="${this.changeDate}"
+            ></mv-calendar>
+          </div>
+          <div>
+            <h4>Calendar with input field - allow partial</h4>
+            <mv-calendar
+              name="dropdownCalendarAP"
               dropdown
               allow-partial
               .theme="${theme}"
-              .selected="${this.selectedDates.inputCalendar}"
+              .selected="${this.selectedDates.dropdownCalendarAP}"
               @select-date="${this.changeDate}"
             ></mv-calendar>
           </div>
@@ -146,7 +175,8 @@ export class MvCalendarDemo extends LitElement {
               allow-partial
               inline-input
               .theme="${theme}"
-              .selected="${this.selectedDates.rangeCalendar}"
+              .start="${this.selectedDates.rangeCalendar.start}"
+              .end="${this.selectedDates.rangeCalendar.end}"
               @select-date="${this.changeDate}"
             ></mv-calendar>
           </div>
@@ -176,8 +206,8 @@ export class MvCalendarDemo extends LitElement {
     const formattedDate =
       name === "rangeCalendar"
         ? {
-            start: this.formatDate(selected.start),
-            end: this.formatDate(selected.end),
+            start: this.formatDate(selected.start.selected),
+            end: this.formatDate(selected.end.selected),
           }
         : this.formatDate(selected);
 

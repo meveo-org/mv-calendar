@@ -1,4 +1,5 @@
 import { LitElement, html, css } from "lit-element";
+import { EMPTY_DATE, NOW, parseDate } from "./utils/index.js";
 import "mv-container";
 import "./single-calendar.js";
 
@@ -6,20 +7,11 @@ export class RangeCalendar extends LitElement {
   static get properties() {
     return {
       theme: { type: String },
-      justify: { type: String },
-      position: { type: String },
       pattern: { type: String },
-      "visible-start-month": { type: Object, attribute: false, reflect: true },
-      "start-date": { type: Object, attribute: false, reflect: true },
-      "visible-end-month": { type: Object, attribute: false, reflect: true },
-      "end-date": { type: Object, attribute: false, reflect: true },
-      inputDate: { type: String, attribute: false, reflect: true },
+      start: { type: Object, attribute: false, reflect: true },
+      end: { type: Object, attribute: false, reflect: true },
       mondayFirst: { type: Boolean, attribute: "monday-first", reflect: true },
       inlineInput: { type: Boolean, attribute: "inline-input", reflect: true },
-      startPlaceholder: { type: String, attribute: "start-placeholder" },
-      endPlaceholder: { type: String, attribute: "end-placeholder" },
-      minYear: { type: Number, attribute: "min-year", reflect: true },
-      maxYear: { type: Number, attribute: "max-year", reflect: true },
       patternRegex: { type: String, attribute: "pattern-regex", reflect: true },
       patternMatcher: {
         type: String,
@@ -31,24 +23,9 @@ export class RangeCalendar extends LitElement {
         attribute: "allow-partial",
         reflect: true,
       },
-      startDateError: {
-        type: Boolean,
-        attribute: "start-date-error",
-        reflect: true,
-      },
-      endDateError: {
-        type: Boolean,
-        attribute: "end-date-error",
-        reflect: true,
-      },
       noClearButton: {
         type: Boolean,
         attribute: "no-clear-button",
-        reflect: true,
-      },
-      buttonTrigger: {
-        type: Boolean,
-        attribute: "button-trigger",
         reflect: true,
       },
     };
@@ -117,18 +94,28 @@ export class RangeCalendar extends LitElement {
   constructor() {
     super();
     this.theme = "light";
-    this.justify = "left";
-    this.position = "bottom";
-    this.startPlaceholder = "";
-    this.endPlaceholder = "";
-    this.noBorder = false;
+    this.start = {
+      selected: { ...EMPTY_DATE },
+      visible: { ...NOW },
+      placeholder: "",
+      hasError: null,
+      minYear: null,
+      maxYear: null,
+    };
+    this.end = {
+      selected: { ...EMPTY_DATE },
+      visible: { ...NOW },
+      placeholder: "",
+      hasError: null,
+      minYear: null,
+      maxYear: null,
+    };
     this.mondayFirst = false;
     this.allowPartial = false;
     this.pattern = "MM/DD/YYYY";
     this.patternMatcher = "MDY";
     this.patternRegex = "\\d";
     this.noClearButton = false;
-    this.buttonTrigger = false;
   }
 
   render() {
@@ -149,86 +136,111 @@ export class RangeCalendar extends LitElement {
             <button @click="${this.resetDateRange}">Custom</button>
           </div>
           <div class="calendar-section">
-            <single-calendar
-              no-border
-              min-year="${this.minYear}"
-              max-year="${this.maxYear}"
-              placeholder="${this.startPlaceholder}"
-              .theme="${this.theme}"
-              .selected-date="${this["start-date"]}"
-              .visible-month="${this["visible-start-month"]}"
-              .pattern="${this.pattern}"
-              .pattern-matcher="${this.patternMatcher}"
-              .pattern-regex="${this.patternRegex}"
-              ?inline-input="${this.inlineInput}"
-              ?monday-first="${this.mondayFirst}"
-              ?has-error="${this.startDateError}"
-              ?allow-partial="${this.allowPartial}"
-              @select-date="${this.updateSelectedDate("start-date")}"
-            ></single-calendar>
-            <single-calendar
-              no-border
-              min-year="${this.minYear}"
-              max-year="${this.maxYear}"
-              placeholder="${this.endPlaceholder}"
-              .theme="${this.theme}"
-              .selected-date="${this["end-date"]}"
-              .visible-month="${this["visible-end-month"]}"
-              .pattern="${this.pattern}"
-              .pattern-matcher="${this.patternMatcher}"
-              .pattern-regex="${this.patternRegex}"
-              ?inline-input="${this.inlineInput}"
-              ?monday-first="${this.mondayFirst}"
-              ?has-error="${this.endDateError}"
-              ?allow-partial="${this.allowPartial}"
-              @select-date="${this.updateSelectedDate("end-date")}"
-            ></single-calendar>
+            ${this.renderSingleCalendar("start")}
+            ${this.renderSingleCalendar("end")}
           </div>
         </div>
       </mv-container>
     `;
   }
 
-  updateSelectedDate = (name) => (event) => {
+  renderSingleCalendar = (name) => {
+    const detail = this[name];
+    const {
+      minYear,
+      maxYear,
+      placeholder,
+      visible,
+      selected,
+      hasError,
+    } = detail;
+    return html`
+      <single-calendar
+        no-border
+        name="${name}"
+        min-year="${minYear}"
+        max-year="${maxYear}"
+        placeholder="${placeholder}"
+        .theme="${this.theme}"
+        .visible="${visible}"
+        .selected="${selected}"
+        .pattern="${this.pattern}"
+        .pattern-matcher="${this.patternMatcher}"
+        .pattern-regex="${this.patternRegex}"
+        ?has-error="${hasError}"
+        ?monday-first="${this.mondayFirst}"
+        ?inline-input="${this.inlineInput}"
+        ?allow-partial="${this.allowPartial}"
+        @select-date="${this.updateSelected}"
+      ></single-calendar>
+    `;
+  };
+
+  parseValues = (name, selected, visible) => {
+    if (!visible) {
+      visible = selected;
+    }
+    return {
+      start: {
+        ...this.start,
+      },
+      end: {
+        ...this.end,
+      },
+      [name]: {
+        ...this[name],
+        selected,
+        visible: { ...this[name].visible, ...visible },
+      },
+    };
+  };
+
+  updateSelected = (event) => {
     const { detail } = event;
-    const { date } = detail;
-    this[name] = date;
-    this[`${name}-error`] = date !== null && !date;
-    this.dispatchDateChange();
+    const { name, selected, visible } = detail;
+    this[name].visible = visible;
+    this.dispatchDateChange(this.parseValues(name, selected, visible));
   };
 
   selectDateRange = (offset, timeUnit) => () => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const unit = !!timeUnit ? timeUnit : "days";
-    const start = !offset
+    const startDate = !offset
       ? today
       : moment(today).subtract(offset, unit).toDate();
-    const end = today;
-    this["start-date"] = start;
-    this["visible-start-month"] = start;
-    this["end-date"] = end;
-    this["visible-end-month"] = end;
-    this.dispatchDateChange();
+    const endDate = today;
+
+    const startValue = parseDate({ date: startDate });
+    const endValue = parseDate({ date: endDate });
+
+    const start = this.parseValues("start", startValue);
+    const end = this.parseValues("end", endValue);
+
+    this.dispatchDateChange({ start: start.start, end: end.end });
   };
 
   resetDateRange = () => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    this["start-date"] = null;
-    this["visible-start-month"] = today;
-    this["end-date"] = null;
-    this["visible-end-month"] = today;
-    this.dispatchDateChange();
+    const selected = {
+      start: {
+        ...this.start,
+        selected: { ...EMPTY_DATE },
+        visible: { ...NOW },
+      },
+      end: {
+        ...this.end,
+        selected: { ...EMPTY_DATE },
+        visible: { ...NOW },
+      },
+    };
+
+    this.dispatchDateChange(selected);
   };
 
-  dispatchDateChange = () => {
+  dispatchDateChange = (selected) => {
     this.dispatchEvent(
-      new CustomEvent(`select-date`, {
-        detail: {
-          start: this["start-date"],
-          end: this["end-date"],
-        },
+      new CustomEvent(`select-range`, {
+        detail: { ...selected },
       })
     );
   };

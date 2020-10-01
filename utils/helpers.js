@@ -7,8 +7,9 @@ export const isEmpty = (testDate) => {
   return isEmptyDay && isEmptyMonth && isEmptyYear;
 };
 
-const parseDate = (date) => {
-  const dateObject = (!!date && date.date) || {
+export const parseDate = (date) => {
+  const dateValue = !!date && date.date;
+  const dateObject = dateValue || {
     getFullYear: () => date.year,
     getMonth: () => date.month,
     getDate: () => date.day,
@@ -16,7 +17,29 @@ const parseDate = (date) => {
   const year = dateObject.getFullYear();
   const month = dateObject.getMonth();
   const day = dateObject.getDate();
-  return { day, month, year };
+  const parsedDate = { day, month, year };
+  if (!!dateValue) {
+    parsedDate.date = dateValue;
+  }
+  return parsedDate;
+};
+
+export const filterDate = (value) => {
+  const { date, year, month, day } = parseDate(value);
+  const filteredDate = {};
+  if (!!date) {
+    filteredDate.date = date;
+  }
+  if (!!year) {
+    filteredDate.year = year;
+  }
+  if (!!month || month === 0) {
+    filteredDate.month = month;
+  }
+  if (!!day) {
+    filteredDate.day = day;
+  }
+  return filteredDate;
 };
 
 export const isEqual = (current, next) => {
@@ -39,7 +62,7 @@ export const getCurrentDate = () => {
 
 export const initializeDate = (date) => {
   if (!date) {
-    return EMPTY_DATE;
+    return { ...EMPTY_DATE };
   }
   const { day, month, year } = date;
   return { day, month, year };
@@ -61,62 +84,4 @@ export const generateWeekDates = (details) => {
       weekDates.slice(week * 7, week * 7 + 7)
     );
   }
-};
-
-export const validateDate = ({ date, year, month, day }) => {
-  const hasSelectedDate = !!date;
-  const hasYear = !!year;
-  const hasMonth = !!month || month === 0;
-  const hasDay = !!day;
-  const hasFullDate = hasYear && hasMonth && hasDay;
-  const hasYearOnly = hasYear && !hasMonth && !hasDay;
-  const hasYearAndMonthOnly = hasYear && hasMonth && !hasDay;
-  return { hasSelectedDate, hasYearOnly, hasYearAndMonthOnly, hasFullDate };
-};
-
-export const parseInput = (selected, allowPartial, inputPattern) => {
-  const { date, year, month, day } = selected;
-  const hasSelectedDate = !!date;
-  const hasYear = !!year;
-  const hasMonth = !!month || month === 0;
-  const hasDay = !!day;
-  const hasFullDate = hasYear && hasMonth && hasDay;
-  const hasYearOnly = hasYear && !hasMonth && !hasDay;
-  const hasYearAndMonthOnly = hasYear && hasMonth && !hasDay;
-
-  const result = {};
-
-  let selectedDate = date;
-
-  if (!hasSelectedDate) {
-    if (hasYearOnly) {
-      selectedDate = new Date();
-      selectedDate.setFullYear(year);
-    } else if (hasYearAndMonthOnly) {
-      selectedDate = new Date(year, month);
-    } else if (hasFullDate) {
-      selectedDate = new Date(year, month, day);
-    } else {
-      selectedDate = null;
-    }
-  }
-
-  result.pattern = inputPattern;
-
-  if (allowPartial) {
-    result.patternMatcher = "MDY";
-    result.patternRegex = "\\d";
-    if (hasYearOnly) {
-      result.pattern = "YYYY";
-    } else if (hasYearAndMonthOnly) {
-      result.pattern = "YYYY/MM";
-    } else {
-      result.pattern = "YYYY/MM/DD";
-    }
-  }
-  result.value = !!selectedDate
-    ? moment(selectedDate.getTime()).format(result.pattern)
-    : "";
-
-  return result;
 };
