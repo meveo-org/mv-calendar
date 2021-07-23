@@ -44,9 +44,6 @@ export class SingleCalendar extends LitElement {
       :host {
         font-family: var(--font-family);
         --font-size: var(--font-size-m, 1rem);
-        --width: var(--mv-calendar-width, calc(var(--font-size) * 16));
-        --mv-container-min-width: calc(var(--width) + 4px);
-        --mv-container-max-width: calc(var(--width) + 4px);
         --mv-container-padding: 10px;
         --mv-container-margin: 0;
       }
@@ -71,14 +68,13 @@ export class SingleCalendar extends LitElement {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        width: var(--width);
+        margin: 0 1px 3px 3px;
       }
 
       .year-month-container {
         display: flex;
         flex-direction: row;
         justify-content: center;
-        margin-left: 5px;
       }
 
       .year-month-container * {

@@ -63,7 +63,7 @@ export class CalendarTable extends LitElement {
       }
 
       .calendar-table {
-        margin: 0 0 5px 5px;
+        margin: 0;
       }
 
       .day {
