@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit-element";
 import { EMPTY_DATE, filterDate } from "./utils/index.js";
-import "mv-dropdown";
+import "@meveo-org/mv-dropdown";
 import "./single-calendar.js";
 
 export class CalendarInput extends LitElement {

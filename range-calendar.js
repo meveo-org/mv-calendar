@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit-element";
 import { EMPTY_DATE, NOW, parseDate } from "./utils/index.js";
-import "mv-container";
+import "@meveo-org/mv-container";
 import "./single-calendar.js";
 
 export class RangeCalendar extends LitElement {

@@ -1,8 +1,8 @@
 import { LitElement, html, css } from "lit-element";
 import { EMPTY_DATE, NOW, isEmpty, initializeDate } from "./utils/index.js";
 import { MONTHS } from "./month-table.js";
-import "mv-container";
-import "mv-input";
+import "@meveo-org/mv-container";
+import "@meveo-org/mv-input";
 import "./calendar-input.js";
 import "./calendar-table.js";
 import "./month-table.js";

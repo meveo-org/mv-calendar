@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit-element";
-import "mv-dropdown";
+import "@meveo-org/mv-dropdown";
 import "./calendar-input.js";
 import "./single-calendar.js";
 
