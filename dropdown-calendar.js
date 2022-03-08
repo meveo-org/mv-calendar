@@ -1,4 +1,4 @@
-import { LitElement, html, css } from "lit-element";
+import { LitElement, html, css } from "lit";
 import "@meveo-org/mv-dropdown";
 import "./calendar-input.js";
 import "./single-calendar.js";

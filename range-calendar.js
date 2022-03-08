@@ -1,4 +1,4 @@
-import { LitElement, html, css } from "lit-element";
+import { LitElement, html, css } from "lit";
 import { EMPTY_DATE, NOW, parseDate } from "./utils/index.js";
 import "@meveo-org/mv-container";
 import "./single-calendar.js";

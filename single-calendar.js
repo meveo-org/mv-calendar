@@ -1,4 +1,4 @@
-import { LitElement, html, css } from "lit-element";
+import { LitElement, html, css } from "lit";
 import { EMPTY_DATE, NOW, isEmpty, initializeDate } from "./utils/index.js";
 import { MONTHS } from "./month-table.js";
 import "@meveo-org/mv-container";

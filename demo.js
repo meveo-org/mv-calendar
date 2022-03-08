@@ -1,4 +1,4 @@
-import { LitElement, html, css } from "lit-element";
+import { LitElement, html, css } from "lit";
 import { EMPTY_DATE } from "./utils/index.js";
 import "./mv-calendar.js";
 

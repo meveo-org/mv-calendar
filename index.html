@@ -21,22 +21,18 @@
       href="https://front.meveo.org/images/favicon.ico"
     />
     <script src="./lib/moment.min.js"></script>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/gh/meveo-org/mv-dependencies@master/es-module-shims/es-module-shims.min.js"
-    ></script>
-    <script type="importmap-shim">
+    <script type="importmap">
       {
         "imports": {
-          "lit-element": "https://cdn.jsdelivr.net/gh/meveo-org/mv-dependencies@master/lit-element.js",
+          "lit": "https://cdn.jsdelivr.net/gh/meveo-org/mv-dependencies@master/lit-core-min-v2.2.0.js",
           "@meveo-org/mv-container": "https://cdn.jsdelivr.net/gh/meveo-org/mv-container@master/mv-container.js",
-          "mv-click-away": "https://cdn.jsdelivr.net/gh/meveo-org/mv-click-away@master/mv-click-away.js",
+          "@meveo-org/mv-click-away": "https://cdn.jsdelivr.net/gh/meveo-org/mv-click-away@master/mv-click-away.js",
           "@meveo-org/mv-dropdown": "https://cdn.jsdelivr.net/gh/meveo-org/mv-dropdown@master/mv-dropdown.js",
           "@meveo-org/mv-input": "https://cdn.jsdelivr.net/gh/meveo-org/mv-input@master/mv-input.js"
         }
       }
     </script>
-    <script type="module-shim" src="./demo.js"></script>
+    <script type="module" src="./demo.js"></script>
   </head>
 
   <body>
