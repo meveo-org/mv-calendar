@@ -114,11 +114,13 @@ export class CalendarTable extends LitElement {
         <table class="calendar-table">
           <thead>
             <tr>
-              ${this.weekDays.map((day) => html`<td class="day">${day}</td>`)}
+              ${(this.weekDays || []).map(
+                (day) => html`<td class="day">${day}</td>`
+              )}
             </tr>
           </thead>
           <tbody>
-            ${this.calendarDates.map(
+            ${(this.calendarDates || []).map(
               (week) => html`
                 <tr>
                   ${week.map((date) => {
@@ -211,6 +213,7 @@ export class CalendarTable extends LitElement {
 
     this.weekDays =
       this.weekDays || (this.mondayFirst ? START_ON_MONDAY : START_ON_SUNDAY);
+    this.requestUpdate();
   };
 
   selectDate = (date) => () => {
