@@ -1,6 +1,6 @@
 {
   "name": "@meveo-org/mv-calendar",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MvCalendar is a Meveo calendar component (based on lit-element) that renders a datepicker component that can display a simple calendar, a calendar with date range, or a datepicker popup in an input field.",
   "main": "mv-calendar.js",
   "directories": {
