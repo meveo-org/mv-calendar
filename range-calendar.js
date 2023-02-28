@@ -1,7 +1,9 @@
 import { LitElement, html, css } from "lit";
 import { EMPTY_DATE, NOW, parseDate } from "./utils/index.js";
+import { Moment } from "moment/moment.js";
 import "@meveo-org/mv-container";
 import "./single-calendar.js";
+import moment from "moment/moment.js";
 
 export class RangeCalendar extends LitElement {
   static get properties() {
@@ -207,8 +209,7 @@ export class RangeCalendar extends LitElement {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const unit = !!timeUnit ? timeUnit : "days";
     const startDate = !offset
-      ? today
-      : moment(today).subtract(offset, unit).toDate();
+      ? today : moment(today).subtract(offset, unit).toDate();
     const endDate = today;
 
     const startValue = parseDate({ date: startDate });

@@ -68,7 +68,7 @@ export class CalendarTable extends LitElement {
 
       .day {
         font-family: var(--font-family);
-        font-size: var(--font-size);
+        font-size: var(--calendar-font-size, var(--font-size));
         margin: 0;
         padding: 0;
         text-align: center;
@@ -150,7 +150,7 @@ export class CalendarTable extends LitElement {
     super.attributeChangedCallback(name, oldValue, newValue);
   }
 
-  initializeCalendarTable = () => {
+  initializeCalendarTable = async () => {
     this.visible = isEmpty(this.visible) ? { ...NOW } : this.visible;
     const year = this.visible.year;
     const month = this.visible.month;
@@ -213,7 +213,7 @@ export class CalendarTable extends LitElement {
 
     this.weekDays =
       this.weekDays || (this.mondayFirst ? START_ON_MONDAY : START_ON_SUNDAY);
-    this.requestUpdate();
+    await this.updateComplete.then(() => this.requestUpdate());
   };
 
   selectDate = (date) => () => {
