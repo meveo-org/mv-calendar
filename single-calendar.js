@@ -280,6 +280,7 @@ export class SingleCalendar extends LitElement {
 
   dispatchUpdates = (selected) => {
     const { visible, name } = this;
+    this.selected = selected;
     this.dispatchEvent(
       new CustomEvent("select-date", { detail: { name, selected, visible } })
     );

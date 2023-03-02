@@ -1,5 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { EMPTY_DATE, filterDate } from "./utils/index.js";
+import moment from "moment/moment.js";
 import "@meveo-org/mv-dropdown";
 import "./single-calendar.js";
 

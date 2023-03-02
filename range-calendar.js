@@ -1,6 +1,5 @@
 import { LitElement, html, css } from "lit";
 import { EMPTY_DATE, NOW, parseDate } from "./utils/index.js";
-import { Moment } from "moment/moment.js";
 import "@meveo-org/mv-container";
 import "./single-calendar.js";
 import moment from "moment/moment.js";
@@ -239,6 +238,7 @@ export class RangeCalendar extends LitElement {
   };
 
   dispatchDateChange = (selected) => {
+    
     this.dispatchEvent(
       new CustomEvent(`select-range`, {
         detail: { ...selected },
